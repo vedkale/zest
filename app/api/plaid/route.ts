@@ -14,7 +14,6 @@ export async function GET(request: Request) {
 
     try {
         const response = await client.linkTokenCreate(plaidRequest);
-        console.log(response.data.link_token);
         return new Response(response.data.link_token);
     } catch (error) {
         // handle error

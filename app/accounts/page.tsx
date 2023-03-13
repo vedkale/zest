@@ -1,13 +1,11 @@
-import AccountItem from "@/components/AccountItem";
+import AccountSet from "@/components/AccountSet";
 import PlaidLink from "@/components/PlaidLink";
 import { client } from "@/lib/plaidClient";
 import { GetAllItemsResponse, ItemType } from "@/lib/types";
 import {
-    AccountBase,
     AccountsGetRequest,
     CountryCode,
     InstitutionsGetByIdRequest,
-    InstitutionsGetByIdResponse,
 } from "plaid";
 import { cache } from "react";
 
@@ -17,17 +15,17 @@ const getAllItems = async () => {
         { cache: "no-store" }
     );
     const data: GetAllItemsResponse = await response.json();
-    // console.log(data);
     return data;
 };
-const getInstitutionById = cache(async (item: ItemType) => {
+
+const getInstitutionById = cache(async (institution_id: string) => {
     const plaidRequest: InstitutionsGetByIdRequest = {
-        institution_id: item.institution_id,
+        institution_id: institution_id,
         country_codes: [CountryCode.Us],
         options: { include_optional_metadata: true },
     };
-    const res = await client.institutionsGetById(plaidRequest);
-    return res.data.institution;
+    const response = await client.institutionsGetById(plaidRequest);
+    return response.data.institution;
 });
 
 const getAccountByToken = async (access_token: string) => {
@@ -35,25 +33,33 @@ const getAccountByToken = async (access_token: string) => {
         access_token: access_token,
     };
     const response = await client.accountsGet(plaidRequest);
-    return response.data.accounts;
+    return response.data;
 };
 
 export default async function Accounts() {
     const allItems = await getAllItems();
-    // const accounts = allItems.items.map(async (item) => { return getInstitutionById(item) });
-    // const institutions = allItems.items.map(async (item) => {[item.institution_id]: await getInstitutionById(item)});
-    const institutions = async () => {Object.assign(
-        {},
-        allItems.items.map(async (item) => ({
-            [item.institution_id]: await getInstitutionById(item),
-        }))
-    )};
+
+    const institutions = await Promise.all(allItems.items.map(async (item) => { return getInstitutionById(item.institution_id)}));
+    // const institution_ids = await Object.assign(
+    //     {},
+    //     allItems.items.map(async (item) => ({
+    //         [item.institution_id]: (
+    //             await getInstitutionById(item.institution_id)
+    //         ),
+    //     }))
+    // );
+    let institution_names: {[key:string]: string} = {};
+
+    institutions.forEach((ins, index) => {
+        institution_names[allItems.items[index].institution_id] = ins.name;
+      });
 
     const accounts = await Promise.all(
         allItems.items.map(async (item) => {
             return getAccountByToken(item.access_token);
         })
     );
+    console.log(JSON.stringify(institution_names));
 
     return (
         <main>
@@ -65,16 +71,18 @@ export default async function Accounts() {
                     <PlaidLink />
                 </div>
 
-                <div className="border border-slate-300 rounded-xl divide-y divide-neutral-200">
+                <div className="flex-col space-y-4">
                     {accounts.map((item) => {
-                        return item.map((account) => {
-                            return (
-                                <AccountItem
-                                    key={account.account_id}
-                                    account={account}
-                                />
-                            );
-                        });
+
+                        return (
+                            <AccountSet
+                                key={item.request_id}
+                                accounts={item.accounts}
+                                // institution_name={"Chase"}
+                                // institution_name = {institution_names['ins_56']}
+                                institution_name = {institution_names[item.item.institution_id!]}
+                            />
+                        );
                     })}
                 </div>
             </div>

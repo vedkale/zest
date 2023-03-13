@@ -1,16 +1,17 @@
 import { ItemType } from "@/lib/types";
-import { AccountBase, Institution } from "plaid";
+import { formatDollar } from "@/lib/utils";
+import { AccountBase } from "plaid";
 
 export default function AccountItem({ account }: { account: AccountBase }) {
-    console.log(JSON.stringify(account));
     return (
-        <div className="flex items-center justify-between p-4">
-            <div className="grid gap-1">
-                <p>{account.name}</p>
-                <p>{`Balance: ${account.balances.current}`}</p>
-            </div>
-            <div>
-                <p>+</p>
+        <div>
+            <div className="flex items-center justify-between p-4 mx-12">
+                <div className="grid gap-1">
+                    <p>{account.name}</p>
+                </div>
+                <div>
+                    <p>{`Balance: ${formatDollar(account.balances.current)}`}</p>
+                </div>
             </div>
         </div>
     );
