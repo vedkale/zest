@@ -1,4 +1,4 @@
-export type ItemType = {
+export interface ItemType {
     id: string;
     access_token: string;
     item_id: string;
@@ -8,7 +8,7 @@ export type ItemType = {
     updated: string;
 }
 
-export type GetAllItemsResponse = {
+export interface GetAllItemsResponse {
     page: number;
     perPage: number;
     totalItems: number;

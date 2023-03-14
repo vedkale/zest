@@ -1,12 +1,15 @@
 import { AccountBase } from "plaid";
 import AccountItem from "./AccountItem";
+import AccountOperations from "./AccountOperations";
 
 export default function AccountSet({
     accounts,
     institution_name,
+    record_id
 }: {
     accounts: AccountBase[];
     institution_name: string;
+    record_id: string;
 }) {
     return (
         <>
@@ -15,6 +18,7 @@ export default function AccountSet({
                     <div className="grid gap-1">
                         <p>{institution_name}</p>
                     </div>
+                    <AccountOperations record_id={record_id}/>
                 </div>
                 {accounts.map((account) => {
                     return (

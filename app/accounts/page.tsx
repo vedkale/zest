@@ -4,10 +4,17 @@ import { client } from "@/lib/plaidClient";
 import { GetAllItemsResponse, ItemType } from "@/lib/types";
 import {
     AccountsGetRequest,
+    AccountsGetResponse,
     CountryCode,
     InstitutionsGetByIdRequest,
 } from "plaid";
 import { cache } from "react";
+
+// AccountsGetResponse
+
+interface AccountsGetResponseExtend extends AccountsGetResponse {
+    recordId: string;
+}
 
 const getAllItems = async () => {
     const response = await fetch(
@@ -39,27 +46,25 @@ const getAccountByToken = async (access_token: string) => {
 export default async function Accounts() {
     const allItems = await getAllItems();
 
-    const institutions = await Promise.all(allItems.items.map(async (item) => { return getInstitutionById(item.institution_id)}));
-    // const institution_ids = await Object.assign(
-    //     {},
-    //     allItems.items.map(async (item) => ({
-    //         [item.institution_id]: (
-    //             await getInstitutionById(item.institution_id)
-    //         ),
-    //     }))
-    // );
-    let institution_names: {[key:string]: string} = {};
+    const institutions = await Promise.all(
+        allItems.items.map(async (item) => {
+            return getInstitutionById(item.institution_id);
+        })
+    );
+    const institution_names: { [key: string]: string } = {};
 
     institutions.forEach((ins, index) => {
         institution_names[allItems.items[index].institution_id] = ins.name;
-      });
+    });
 
-    const accounts = await Promise.all(
+    const accounts: AccountsGetResponseExtend[] = await Promise.all(
         allItems.items.map(async (item) => {
-            return getAccountByToken(item.access_token);
+            const a: any = await getAccountByToken(item.access_token);
+            a.record_id = item.id;
+            return a;
         })
     );
-    console.log(JSON.stringify(institution_names));
+    console.log(accounts);
 
     return (
         <main>
@@ -73,14 +78,14 @@ export default async function Accounts() {
 
                 <div className="flex-col space-y-4">
                     {accounts.map((item) => {
-
                         return (
                             <AccountSet
                                 key={item.request_id}
                                 accounts={item.accounts}
-                                // institution_name={"Chase"}
-                                // institution_name = {institution_names['ins_56']}
-                                institution_name = {institution_names[item.item.institution_id!]}
+                                institution_name={
+                                    institution_names[item.item.institution_id!]
+                                }
+                                record_id={item.record_id}
                             />
                         );
                     })}

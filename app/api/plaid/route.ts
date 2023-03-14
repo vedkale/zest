@@ -33,7 +33,7 @@ export async function POST(request: Request) {
     };
 
     try {
-        await fetch(
+        const response = await fetch(
             "http://127.0.0.1:8090/api/collections/items_table/records",
             {
                 method: "POST",
@@ -43,8 +43,8 @@ export async function POST(request: Request) {
                 body: JSON.stringify(postData),
             }
         );
+        return response;
     } catch (error) {
         console.log(JSON.stringify(error));
     }
-    return new Response("Success");
 }
