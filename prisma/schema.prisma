@@ -1,0 +1,63 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Item {
+  id                  Int       @id @default(autoincrement())
+  access_token        String    @unique
+  item_id             String    @unique
+  institution_id      String
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @default(now())
+  transactions_cursor String?
+  accounts            Account[]
+}
+
+model Account {
+  id                Int           @id @default(autoincrement())
+  account_id        String        @unique
+  name              String
+  mask              String?
+  subtype           String?
+  type              String
+  balance_available Float?
+  balance_current   Float?
+  balance_date      DateTime?
+  balance_limit     Float?
+  balance_iso       String?
+  created_at        DateTime      @default(now())
+  updated_at        DateTime      @default(now())
+  item_id           String
+  Item              Item          @relation(fields: [item_id], references: [item_id], onDelete: Cascade)
+  transactions      Transaction[]
+}
+
+model Transaction {
+  id              Int       @id @default(autoincrement())
+  transaction_id  String    @unique
+  account_id      String
+  category_id     String
+  category        String
+  date            DateTime
+  name            String
+  amount          Float
+  pending         Boolean
+  pending_id      String?
+  pending_date    DateTime?
+  meta            String?
+  account_owner   String?
+  location        String?
+  iso_currency    String?
+  unofficial_name Boolean?
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @default(now())
+  Account         Account   @relation(fields: [account_id], references: [account_id], onDelete: Cascade)
+}

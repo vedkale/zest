@@ -17,6 +17,11 @@ const navItems: { [pathname: string]: { name: string; y: number; w: string } } =
             y: 35,
             w: "92px",
         },
+        "/transactions": {
+            name: "Transactions",
+            y: 68,
+            w: "120px",
+        },
     };
 
 export default function Sidebar() {

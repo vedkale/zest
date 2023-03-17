@@ -16,8 +16,8 @@ export default function PlaidLink() {
     const router = useRouter();
 
     const generateToken = async () => {
-        const response = await fetch("/api/plaid").then((res) => res.text());
-        setLinkToken((t) => (t = response));
+        const { token } = await fetch("/api/plaid").then((res) => res.json());
+        setLinkToken((t) => (t = token));
     };
 
     useEffect(() => {
@@ -28,14 +28,15 @@ export default function PlaidLink() {
         async (public_token: string, metadata: PlaidLinkOnSuccessMetadata) => {
             // log and save metadata
             // exchange public token
-            await fetch("/api/plaid", {
+            const response = await fetch("/api/plaid", {
                 method: "POST",
                 body: JSON.stringify({
                     public_token: public_token,
                     institution_id: metadata.institution?.institution_id,
                 }),
             });
-
+            const l = await response.json();
+            // console.log("mimimii" + JSON.stringify(l));
             // forces a cache invalidation
             router.refresh();
             router.push("/accounts");

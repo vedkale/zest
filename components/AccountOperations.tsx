@@ -33,7 +33,7 @@ async function deletePost(id: string) {
         //     description: "Your post was not deleted. Please try again.",
         //     variant: "destructive",
         //   })
-        console.log('account delete failed... *dun dun dun*');
+        console.log('account delete failed...');
         return false;
     }
 

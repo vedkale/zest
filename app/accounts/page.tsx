@@ -44,27 +44,26 @@ const getAccountByToken = async (access_token: string) => {
 };
 
 export default async function Accounts() {
-    const allItems = await getAllItems();
+    // const allItems = await getAllItems();
 
-    const institutions = await Promise.all(
-        allItems.items.map(async (item) => {
-            return getInstitutionById(item.institution_id);
-        })
-    );
-    const institution_names: { [key: string]: string } = {};
+    // const institutions = await Promise.all(
+    //     allItems.items.map(async (item) => {
+    //         return getInstitutionById(item.institution_id);
+    //     })
+    // );
+    // const institution_names: { [key: string]: string } = {};
 
-    institutions.forEach((ins, index) => {
-        institution_names[allItems.items[index].institution_id] = ins.name;
-    });
+    // institutions.forEach((ins, index) => {
+    //     institution_names[allItems.items[index].institution_id] = ins.name;
+    // });
 
-    const accounts: AccountsGetResponseExtend[] = await Promise.all(
-        allItems.items.map(async (item) => {
-            const a: any = await getAccountByToken(item.access_token);
-            a.record_id = item.id;
-            return a;
-        })
-    );
-    console.log(accounts);
+    // const accounts: AccountsGetResponseExtend[] = await Promise.all(
+    //     allItems.items.map(async (item) => {
+    //         const a: any = await getAccountByToken(item.access_token);
+    //         a.record_id = item.id;
+    //         return a;
+    //     })
+    // );
 
     return (
         <main>
@@ -76,7 +75,7 @@ export default async function Accounts() {
                     <PlaidLink />
                 </div>
 
-                <div className="flex-col space-y-4">
+                {/* <div className="flex-col space-y-4">
                     {accounts.map((item) => {
                         return (
                             <AccountSet
@@ -89,7 +88,7 @@ export default async function Accounts() {
                             />
                         );
                     })}
-                </div>
+                </div> */}
             </div>
         </main>
     );
