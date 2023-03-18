@@ -1,4 +1,4 @@
-import { AccountBase } from "plaid";
+import { Account } from "@prisma/client";
 import AccountItem from "./AccountItem";
 import AccountOperations from "./AccountOperations";
 
@@ -7,9 +7,9 @@ export default function AccountSet({
     institution_name,
     record_id
 }: {
-    accounts: AccountBase[];
+    accounts: Account[];
     institution_name: string;
-    record_id: string;
+    record_id: number;
 }) {
     return (
         <>

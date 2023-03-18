@@ -28,14 +28,15 @@ export default function PlaidLink() {
         async (public_token: string, metadata: PlaidLinkOnSuccessMetadata) => {
             // log and save metadata
             // exchange public token
-            const response = await fetch("/api/plaid", {
+
+            await fetch("/api/plaid", {
                 method: "POST",
                 body: JSON.stringify({
                     public_token: public_token,
                     institution_id: metadata.institution?.institution_id,
+                    institution_name: metadata.institution?.name
                 }),
             });
-            const l = await response.json();
             // console.log("mimimii" + JSON.stringify(l));
             // forces a cache invalidation
             router.refresh();

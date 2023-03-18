@@ -1,17 +1,14 @@
 import { db } from "@/lib/db";
 import { client } from "@/lib/plaidClient";
-import { requestToBodyStream } from "next/dist/server/body-streams";
 import { NextResponse } from "next/server";
 import {
     AccountBase,
-    AccountsGetRequest,
-    AccountsGetResponse,
     CountryCode,
     LinkTokenCreateRequest,
     Products,
 } from "plaid";
 import { RequiredError } from "plaid/dist/base";
-import { boolean, z } from "zod";
+import { z } from "zod";
 
 export async function GET(request: Request) {
     const plaidRequest: LinkTokenCreateRequest = {
@@ -36,6 +33,7 @@ const itemCreateSchema = z.object({
     access_token: z.string(),
     item_id: z.string(),
     institution_id: z.string(),
+    institution_name: z.string(),
     transactions_cursor: z.string().optional(),
 });
 
@@ -55,13 +53,15 @@ const accountCreateSchema = z.object({
 
 export async function POST(request: Request) {
     try {
-        const { public_token, institution_id } = await request.json();
+        const { public_token, institution_id, institution_name } =
+            await request.json();
         const response = await client.itemPublicTokenExchange({ public_token });
 
         const body = itemCreateSchema.parse({
             access_token: response.data.access_token,
             item_id: response.data.item_id,
             institution_id: institution_id,
+            institution_name: institution_name,
         });
 
         const item = await db.item.create({
@@ -69,6 +69,7 @@ export async function POST(request: Request) {
                 access_token: body.access_token,
                 item_id: body.item_id,
                 institution_id: body.institution_id,
+                institution_name: body.institution_name,
             },
             select: {
                 id: true,
@@ -92,8 +93,8 @@ export async function POST(request: Request) {
                 balance_limit: account.balances.limit,
                 balance_iso: account.balances.iso_currency_code,
                 item_id: response.data.item_id,
-            }); 
-            
+            });
+
             await db.account.create({
                 data: {
                     account_id: body.account_id,
@@ -111,7 +112,8 @@ export async function POST(request: Request) {
             });
         });
 
-        return NextResponse.json(accounts.data);
+        // return NextResponse.json(accounts.data);
+        return NextResponse.json(item);
     } catch (error) {
         if (error instanceof z.ZodError) {
             return NextResponse.json(error.issues, { status: 422 });

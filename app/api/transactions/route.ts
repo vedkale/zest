@@ -31,7 +31,7 @@ export async function POST(request: Request) {
             cursor = data.next_cursor;
         }
     } catch (error) {
-        console.log(`Error fetching transactions: ${JSON.stringify(error)}`);
+        console.log(`Error fetching transactions: ${error}`);
     }
 
     // Persist cursor and updated data

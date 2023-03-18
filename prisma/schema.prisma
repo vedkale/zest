@@ -14,7 +14,8 @@ model Item {
   id                  Int       @id @default(autoincrement())
   access_token        String    @unique
   item_id             String    @unique
-  institution_id      String
+  institution_id      String    @unique
+  institution_name    String
   created_at          DateTime  @default(now())
   updated_at          DateTime  @default(now())
   transactions_cursor String?

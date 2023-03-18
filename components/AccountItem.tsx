@@ -1,8 +1,7 @@
-import { ItemType } from "@/lib/types";
 import { formatDollar } from "@/lib/utils";
-import { AccountBase } from "plaid";
+import { Account } from "@prisma/client";
 
-export default function AccountItem({ account }: { account: AccountBase }) {
+export default function AccountItem({ account }: { account: Account }) {
     return (
         <div>
             <div className="flex items-center justify-between p-4 mx-12">
@@ -10,7 +9,7 @@ export default function AccountItem({ account }: { account: AccountBase }) {
                     <p>{account.name}</p>
                 </div>
                 <div>
-                    <p>{`Balance: ${formatDollar(account.balances.current)}`}</p>
+                    <p>{`Balance: ${formatDollar(account.balance_current)}`}</p>
                 </div>
             </div>
         </div>

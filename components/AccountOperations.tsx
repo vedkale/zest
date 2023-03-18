@@ -20,27 +20,29 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "./ui/AlertDialog";
-import { idText } from "typescript";
 
-async function deletePost(id: string) {
+async function deletePost(id: number) {
     const response = await fetch(`/api/accounts/${id}`, {
         method: "DELETE",
     });
-
     if (!response?.ok) {
         //   toast({
         //     title: "Something went wrong.",
         //     description: "Your post was not deleted. Please try again.",
         //     variant: "destructive",
         //   })
-        console.log('account delete failed...');
+        console.error(`Account delete failed for id: ${id}`);
         return false;
     }
 
     return true;
 }
 
-export default function AccountOperations({ record_id }: { record_id: string }) {
+export default function AccountOperations({
+    record_id,
+}: {
+    record_id: number;
+}) {
     const router = useRouter();
     const [showDeleteAlert, setShowDeleteAlert] = useState<boolean>(false);
     const [isDeleteLoading, setIsDeleteLoading] = useState<boolean>(false);
@@ -81,7 +83,6 @@ export default function AccountOperations({ record_id }: { record_id: string }) 
                                 setIsDeleteLoading(true);
 
                                 const deleted = await deletePost(record_id);
-                                // const deleted = true;
 
                                 if (deleted) {
                                     setIsDeleteLoading(false);
