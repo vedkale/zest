@@ -42,23 +42,19 @@ model Account {
 }
 
 model Transaction {
-  id              Int       @id @default(autoincrement())
-  transaction_id  String    @unique
-  account_id      String
-  category_id     String
-  category        String
-  date            DateTime
-  name            String
-  amount          Float
-  pending         Boolean
-  pending_id      String?
-  pending_date    DateTime?
-  meta            String?
-  account_owner   String?
-  location        String?
-  iso_currency    String?
-  unofficial_name Boolean?
-  created_at      DateTime  @default(now())
-  updated_at      DateTime  @default(now())
-  Account         Account   @relation(fields: [account_id], references: [account_id], onDelete: Cascade)
+  id                Int      @id @default(autoincrement())
+  transaction_id    String   @unique
+  account_id        String
+  category_id       String?
+  category          String?
+  subcategory       String?
+  date              DateTime
+  name              String
+  merchant_name     String?
+  amount            Float
+  pending           Boolean
+  iso_currency_code String?
+  created_at        DateTime @default(now())
+  updated_at        DateTime @default(now())
+  Account           Account  @relation(fields: [account_id], references: [account_id], onDelete: Cascade)
 }

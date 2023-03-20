@@ -1,23 +1,57 @@
+import { db } from "@/lib/db";
 import { client } from "@/lib/plaidClient";
+import { NextResponse } from "next/server";
 import {
     RemovedTransaction,
-    Transaction,
+    Transaction as PlaidTransaction,
     TransactionsSyncRequest,
 } from "plaid";
+import { z } from "zod";
 
-export async function POST(request: Request) {
-    let { cursor, access_token } = await request.json();
-    // New transaction updates since "cursor"
-    let added: Array<Transaction> = [];
-    let modified: Array<Transaction> = [];
-    // Removed transaction ids
-    let removed: Array<RemovedTransaction> = [];
-    let hasMore = true;
+const transactionCreateSchema = z.object({
+    account_id: z.string(),
+    amount: z.number(),
+    iso_currency_code: z.string().nullable(),
+    category: z.string().nullable(),
+    subcategory: z.string().nullable(),
+    category_id: z.string().nullable(),
+    date: z.date(),
+    name: z.string(),
+    merchant_name: z.string().optional().nullable(),
+    pending: z.boolean(),
+    transaction_id: z.string(),
+});
+
+export async function GET(request: Request, context: { params: any }) {
     try {
+        const { searchParams } = new URL(request.url);
+        const id = searchParams.get("id");
+        if (!id) return new Response("id is null", { status: 400 });
+
+        const item = await db.item.findUnique({
+            where: {
+                id: +id,
+            },
+        });
+
+        if (!item) {
+            throw new Error("Item not found.");
+        }
+
+        let cursor: string | undefined = item.transactions_cursor as any; //ts really sucks
+        console.log(cursor);
+
+        // New transaction updates since "cursor"
+        let added: Array<PlaidTransaction> = [];
+        let modified: Array<PlaidTransaction> = [];
+        // Removed transaction ids
+        let removed: Array<RemovedTransaction> = [];
+        let hasMore = true;
+
         // Iterate through each page of new transaction updates for item
         while (hasMore) {
             const request: TransactionsSyncRequest = {
-                access_token: access_token,
+                access_token: item.access_token,
                 cursor: cursor,
             };
             const response = await client.transactionsSync(request);
@@ -29,77 +63,76 @@ export async function POST(request: Request) {
             hasMore = data.has_more;
             // Update cursor to the next cursor
             cursor = data.next_cursor;
+            console.log(hasMore, cursor);
         }
-    } catch (error) {
-        console.log(`Error fetching transactions: ${error}`);
-    }
 
-    // Persist cursor and updated data
-    // database.applyUpdates(itemId, added, modified, removed, cursor);
-    // return new Response(JSON.stringify({ cursor: cursor }));
-    // try {
-    //     added.map(async (t) => {
-    //         const data = {
-    //             account_id: t.account_id,
-    //             plaid_transaction_id: t.transaction_id,
-    //             plaid_category_id: t.category_id,
-    //             category: t.category ? t.category[0] : "",
-    //             subcategory: t.category ? t.category[1] : "",
-    //             name: t.name,
-    //             amount: t.amount,
-    //             iso_currency_code: t.iso_currency_code,
-    //             unofficial_currency_code: t.unofficial_currency_code,
-    //             date: t.date,
-    //             pending: t.pending,
-    //             account_owner: t.account_owner,
-    //         };
+        // if (!(added || modified || removed))
+        //     return NextResponse.json({}, { status: 204 });
 
-    //         const res = await fetch(
-    //             "http://127.0.0.1:8090/api/collections/transactions_table/records",
-    //             {
-    //                 method: "POST",
-    //                 headers: {
-    //                     "Content-Type": "application/json",
-    //                 },
-    //                 body: JSON.stringify(data),
-    //             }
-    //         );
-    //         return res;
-    //         // console.log(res);
-    //     });
-    // } catch (error) {
-    //     console.log(`Error updating transactions: ${JSON.stringify(error)}`);
-    // }
-    // return new Response(JSON.stringify({ added }));
-    for (let i = 0; i < added.length; i++) {
-        // const element = added[i];
-        let t = added[i];
-        const data = {
-            account_id: t.account_id,
-            plaid_transaction_id: t.transaction_id,
-            plaid_category_id: t.category_id,
-            category: t.category ? t.category[0] : "",
-            subcategory: t.category ? t.category[1] : "",
-            name: t.name,
-            amount: t.amount,
-            iso_currency_code: t.iso_currency_code,
-            unofficial_currency_code: t.unofficial_currency_code,
-            date: t.date,
-            pending: t.pending,
-            account_owner: t.account_owner,
-            type: t.payment_channel
-        };
-        const res = await fetch(
-            "http://127.0.0.1:8090/api/collections/transactions_table/records",
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
+        var startTime = performance.now();
+
+        //upsert probbly
+        added.map(async (transaction) => {
+            const body = transactionCreateSchema.parse({
+                account_id: transaction.account_id,
+                amount: transaction.amount,
+                iso_currency_code: transaction.iso_currency_code,
+                category: transaction.category?.[0],
+                subcategory: transaction.category?.[1],
+                category_id: transaction.category_id,
+                date: new Date(transaction.date),
+                name: transaction.name,
+                merchant_name: transaction.merchant_name,
+                pending: transaction.pending,
+                transaction_id: transaction.transaction_id,
+            });
+
+            await db.transaction.create({
+                data: {
+                    account_id: body.account_id,
+                    amount: body.amount,
+                    iso_currency_code: body.iso_currency_code,
+                    category: body.category,
+                    subcategory: body.subcategory,
+                    category_id: body.category_id,
+                    date: body.date,
+                    name: body.name,
+                    merchant_name: body.merchant_name,
+                    pending: body.pending,
+                    transaction_id: body.transaction_id,
                 },
-                body: JSON.stringify(data),
-            }
-        );
-        return res;
+            });
+        });
+
+        // removed.map(async (transaction) => {
+        //     await db.transaction.delete({
+        //         where: {
+        //             transaction_id: transaction.transaction_id,
+        //         },
+        //     });
+        // });
+
+        await db.item.update({
+            where: {
+                id: +id,
+            },
+            data: {
+                transactions_cursor: cursor,
+            },
+        });
+
+        var endTime = performance.now();
+        console.log(`Call for puts took ${endTime - startTime} milliseconds`);
+
+        return NextResponse.json({
+            added: added.length,
+            removed: removed.length,
+            updated: modified.length,
+        });
+    } catch (error) {
+        if (error instanceof z.ZodError) {
+            return NextResponse.json(error.issues, { status: 422 });
+        }
+        console.error(`Error fetching transaction: ${error}`);
     }
-    return new Response(JSON.stringify({ added }));
 }
