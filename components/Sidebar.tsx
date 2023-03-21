@@ -12,15 +12,15 @@ const navItems: { [pathname: string]: { name: string; y: number; w: string } } =
             y: 0,
             w: "64px",
         },
-        "/accounts": {
-            name: "Accounts",
-            y: 35,
-            w: "92px",
-        },
         "/transactions": {
             name: "Transactions",
-            y: 68,
+            y: 35,
             w: "120px",
+        },
+        "/accounts": {
+            name: "Accounts",
+            y: 68,
+            w: "92px",
         },
     };
 
