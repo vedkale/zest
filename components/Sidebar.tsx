@@ -26,7 +26,6 @@ const navItems: { [pathname: string]: { name: string; y: number; w: string } } =
 
 export default function Sidebar() {
     let pathname = usePathname() || "/";
-
     return (
         <aside className="font-sans flex-shrink-0 px-0 mx-0">
             <div className="sticky">

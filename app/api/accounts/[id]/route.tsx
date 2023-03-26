@@ -2,7 +2,6 @@ import { db } from "@/lib/db";
 
 export async function DELETE(request: Request, context: { params: any }) {
     try {
-        console.log(context.params.id);
         const item = await db.item.delete({
             where: {
                 id: +context.params.id,

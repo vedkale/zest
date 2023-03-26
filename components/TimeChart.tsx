@@ -7,10 +7,9 @@ import {
     LinearScale,
     PointElement,
     Tooltip,
-    ChartOptions,
     TimeScale,
-    Legend,
     Title,
+    SubTitle,
 } from "chart.js";
 import "chartjs-adapter-date-fns";
 import { Line } from "react-chartjs-2";
@@ -20,21 +19,45 @@ ChartJS.register(
     LinearScale,
     PointElement,
     LineElement,
-    Tooltip,
+    SubTitle,
+    Title,
+    Tooltip
 );
 
 const date = new Date();
 
 export const options = {
-    response: true,
-    maintainAspectRation: false,
+    responsive: true,
+    layout: {
+        padding: 20,
+    },
     plugins: {
+        legend: {
+            display: false,
+        },
+        tooltip: {
+            enabled: false,
+        },
+        title: {
+            display: true,
+            text: "Monthly Spend",
+        },
+        subtitle: {
+            display: true,
+            text: "Chart Subtitle",
+        },
     },
     scales: {
         x: {
             type: "time",
             time: {
                 unit: "day",
+            },
+            grid: {
+                display: false,
+            },
+            border: {
+                color: "white",
             },
         },
         y: {
@@ -46,6 +69,12 @@ export const options = {
                 callback: function (value: any, index: any, ticks: any) {
                     return formatDollar(value);
                 },
+            },
+            grid: {
+                display: false,
+            },
+            border: {
+                color: "white",
             },
         },
     },
@@ -60,16 +89,25 @@ export const options = {
 export default function TimeChart({
     data,
     labels,
+    title,
+    subtitle
 }: {
     data: number[];
-    labels: Date[];
+    labels: string[];
+    title: string;
+    subtitle: string;
 }) {
+    options.plugins.title.text = title;
+    options.plugins.subtitle.text = subtitle;
+    const dateData = data.map((x) => {
+        return new Date(x);
+    });
     const chartData = {
         labels: labels,
         datasets: [
             {
-                label: "AAAAAAAA",
-                data: data,
+                label: "Monthly Spend",
+                data: dateData,
                 borderColor: "rgb(255, 99, 132)",
                 backgroundColor: "rgba(0, 99, 132, 0.5)",
                 tension: 0.3,

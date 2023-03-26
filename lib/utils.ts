@@ -11,7 +11,7 @@ export function formatDollar(input: number | null): string {
     return input.toLocaleString("en-US", {
         style: "currency",
         currency: "USD",
-        notation: 'compact'
+        notation: "compact",
     });
 }
 
@@ -27,13 +27,20 @@ export function cumsumDate(
     for (let index = 0; index < transactions.length; index++) {
         const element = transactions[index];
         const amt = element._sum.amount ? element._sum.amount : 0;
-        if (cumsum.length == 0)
-        {
-            cumsum.push({date: element.date, amount: amt})
+        if (cumsum.length == 0) {
+            cumsum.push({ date: element.date, amount: amt });
             continue;
         }
-        cumsum.push({date: element.date, amount: amt + cumsum[cumsum.length - 1].amount})
+        cumsum.push({
+            date: element.date,
+            amount: amt + cumsum[cumsum.length - 1].amount,
+        });
     }
 
     return cumsum;
+}
+
+export function amountSign(accountType: string) {
+    if (accountType === "depository") return -1;
+    return 1;
 }

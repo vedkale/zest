@@ -1,6 +1,7 @@
 import "./globals.css";
 import { Roboto_Mono } from "next/font/google";
 import Sidebar from "@/components/Sidebar";
+import { cache } from "react";
 
 const roboto_mono = Roboto_Mono({
     subsets: ["latin"],
@@ -25,9 +26,10 @@ export default function RootLayout({
         >
             <body className="antialiased mb-40 flex pl-4 pt-10 pr-4">
                 <Sidebar />
-                <main className="flex-auto min-w-fit flex flex-col px-0 mt-0">{children}</main>
+                <main className="flex-auto min-w-fit flex flex-col px-0 mt-0">
+                    {children}
+                </main>
             </body>
         </html>
     );
 }
-

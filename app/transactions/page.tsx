@@ -1,9 +1,7 @@
 import { db } from "@/lib/db";
-import { Transaction } from "@prisma/client";
 import { cache } from "react";
 import { ScrollArea } from "@/components/ui/ScrollArea";
 import { Input } from "@/components/ui/Input";
-import AccountOperations from "@/components/AccountOperations";
 import FilterOptions from "@/components/FilterOptions";
 
 const getTransactions = cache(async () => {
@@ -18,7 +16,11 @@ const getTransactions = cache(async () => {
 });
 
 export default async function Transactions() {
+    
     const transactions = await getTransactions();
+
+
+
     return (
         <main className="max-h-3.5">
             <div className="grid items-start gap-4">
@@ -35,59 +37,54 @@ export default async function Transactions() {
                 </div>
                 <div className="">
                     <ScrollArea className="h-[80vh] rounded-md border border-slate-700 p-4">
-                        <table>
-                            <thead className="m-0 p-0">
+                        <table className="table-auto w-full">
+                            <thead className="">
                                 <tr>
                                     <th>Name</th>
                                     <th>Date</th>
                                     <th>Amount</th>
                                     <th>Category</th>
                                     <th>Account</th>
-                                    {/* <th>Pending</th> */}
                                 </tr>
                             </thead>
                             <tbody>
-                                {transactions.map(
-                                    (transaction) => {
-                                        return (
-                                            <tr
-                                                className="m-0 border-t border-slate-200 p-0"
-                                                key={transaction.account_id}
-                                            >
-                                                <td className="px-10 py-2 text-left dark:border-slate-700 [&[align=center]]:text-center [&[align=right]]:text-right">
-                                                    {transaction.name}
-                                                </td>
-                                                <td className="px-10 py-2 text-left dark:border-slate-700 [&[align=center]]:text-center [&[align=right]]:text-right">
-                                                    {transaction.date.toLocaleDateString()}
-                                                </td>
-                                                <td className="px-10 py-2 text-left dark:border-slate-700 [&[align=center]]:text-center [&[align=right]]:text-right">
-                                                    {Math.sign(
-                                                        transaction.amount
-                                                    ) === 1 ? (
-                                                        <p className="text-red-500">
-                                                            ${transaction.amount}
-                                                        </p>
-                                                    ) : (
-                                                        <p className="text-green-500">
-                                                            ${Math.abs(transaction.amount)}
-                                                        </p>
-                                                    )}
-                                                </td>
-                                                <td className="px-10 py-2 text-left dark:border-slate-700 [&[align=center]]:text-center [&[align=right]]:text-right">
-                                                    {transaction.category}
-                                                </td>
-                                                <td className="px-10 py-2 text-left dark:border-slate-700 [&[align=center]]:text-center [&[align=right]]:text-right">
-                                                    {transaction.Account.name}
-                                                </td>
-                                                {/* <td className="px-10 py-2 text-left dark:border-slate-700 [&[align=center]]:text-center [&[align=right]]:text-right">
-                                                    {transaction.pending
-                                                        ? "Yes"
-                                                        : "No"}
-                                                </td> */}
-                                            </tr>
-                                        );
-                                    }
-                                )}
+                                {transactions.map((transaction) => {
+                                    return (
+                                        <tr
+                                            className="m-0 border-t border-slate-200 p-0"
+                                            key={transaction.transaction_id}
+                                        >
+                                            <td className="text-left dark:border-slate-700 [&[align=center]]:text-center [&[align=right]]:text-right">
+                                                {transaction.name}
+                                            </td>
+                                            <td className="text-left dark:border-slate-700 [&[align=center]]:text-center [&[align=right]]:text-right">
+                                                {transaction.date.toLocaleDateString()}
+                                            </td>
+                                            <td className="text-left dark:border-slate-700 [&[align=center]]:text-center [&[align=right]]:text-right">
+                                                {Math.sign(
+                                                    transaction.amount
+                                                ) === 1 ? (
+                                                    <p className="text-red-500">
+                                                        ${transaction.amount}
+                                                    </p>
+                                                ) : (
+                                                    <p className="text-green-500">
+                                                        $
+                                                        {Math.abs(
+                                                            transaction.amount
+                                                        )}
+                                                    </p>
+                                                )}
+                                            </td>
+                                            <td className="text-left dark:border-slate-700 [&[align=center]]:text-center [&[align=right]]:text-right">
+                                                {transaction.category}
+                                            </td>
+                                            <td className="text-left dark:border-slate-700 [&[align=center]]:text-center [&[align=right]]:text-right">
+                                                {transaction.Account.name}
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
                             </tbody>
                         </table>
                     </ScrollArea>

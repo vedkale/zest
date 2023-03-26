@@ -11,10 +11,10 @@ import { z } from "zod";
 const transactionCreateSchema = z.object({
     account_id: z.string(),
     amount: z.number(),
-    iso_currency_code: z.string().nullable(),
-    category: z.string().nullable(),
-    subcategory: z.string().nullable(),
-    category_id: z.string().nullable(),
+    iso_currency_code: z.string().nullable().optional(),
+    category: z.string().nullable().optional(),
+    subcategory: z.string().nullable().optional(),
+    category_id: z.string().nullable().optional(),
     date: z.date(),
     name: z.string(),
     merchant_name: z.string().optional().nullable(),
@@ -22,7 +22,8 @@ const transactionCreateSchema = z.object({
     transaction_id: z.string(),
 });
 
-export async function GET(request: Request, context: { params: any }) {
+export async function POST(request: Request, context: { params: any }) {
+    console.log("MEOW");
     try {
         const { searchParams } = new URL(request.url);
         const id = searchParams.get("id");
@@ -39,7 +40,6 @@ export async function GET(request: Request, context: { params: any }) {
         }
 
         let cursor: string | undefined = item.transactions_cursor as any; //ts really sucks
-        console.log(cursor);
 
         // New transaction updates since "cursor"
         let added: Array<PlaidTransaction> = [];
@@ -63,7 +63,6 @@ export async function GET(request: Request, context: { params: any }) {
             hasMore = data.has_more;
             // Update cursor to the next cursor
             cursor = data.next_cursor;
-            console.log(hasMore, cursor);
         }
 
         // if (!(added || modified || removed))
@@ -104,13 +103,13 @@ export async function GET(request: Request, context: { params: any }) {
             });
         });
 
-        // removed.map(async (transaction) => {
-        //     await db.transaction.delete({
-        //         where: {
-        //             transaction_id: transaction.transaction_id,
-        //         },
-        //     });
-        // });
+        removed.map(async (transaction) => {
+            await db.transaction.delete({
+                where: {
+                    transaction_id: transaction.transaction_id,
+                },
+            });
+        });
 
         await db.item.update({
             where: {
@@ -122,7 +121,7 @@ export async function GET(request: Request, context: { params: any }) {
         });
 
         var endTime = performance.now();
-        console.log(`Call for puts took ${endTime - startTime} milliseconds`);
+        console.info(`Call for puts took ${endTime - startTime} milliseconds`);
 
         return NextResponse.json({
             added: added.length,

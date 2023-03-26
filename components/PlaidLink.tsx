@@ -37,7 +37,6 @@ export default function PlaidLink() {
                     institution_name: metadata.institution?.name
                 }),
             });
-            // console.log("mimimii" + JSON.stringify(l));
             // forces a cache invalidation
             router.refresh();
             router.push("/accounts");
