@@ -1,8 +1,10 @@
 import { db } from "@/lib/db";
 import { cache } from "react";
 import { ScrollArea } from "@/components/ui/ScrollArea";
-import { Input } from "@/components/ui/Input";
-import FilterOptions from "@/components/FilterOptions";
+import SearchBar from "@/components/SearchBar";
+import { Account, Transaction } from "@prisma/client";
+import { EmptyPlaceholder } from "@/components/EmptyPlaceholder";
+import PlaidLink from "@/components/PlaidLink";
 
 const getTransactions = cache(async () => {
     return await db.transaction.findMany({
@@ -15,11 +17,35 @@ const getTransactions = cache(async () => {
     });
 });
 
-export default async function Transactions() {
-    
+function filterTransaction(
+    transactions: (Transaction & {
+        Account: Account;
+    })[],
+    search: string
+) {
+    const keywords = search
+        .toLowerCase()
+        .split(" ")
+        .filter((s) => s !== "");
+    if (keywords.length === 0) {
+        return transactions;
+    }
+    return transactions.filter((transaction) => {
+        const words = transaction.name.toLowerCase().split(" ");
+        return keywords.every((kw) => words.some((w) => w.includes(kw)));
+    });
+}
+
+export default async function Transactions({
+    searchParams,
+}: {
+    searchParams: { [key: string]: string | string[] | undefined };
+}) {
     const transactions = await getTransactions();
-
-
+    const filteredTransactions = filterTransaction(
+        transactions,
+        (searchParams.search as string) ?? ""
+    );
 
     return (
         <main className="max-h-3.5">
@@ -30,65 +56,84 @@ export default async function Transactions() {
                     </h1>
                 </div>
                 <div className="flex flex-row">
-                    <Input placeholder="Search" type="search" />
-                    <div className="px-2">
-                        <FilterOptions />
+                    <SearchBar />
+                </div>
+                {filteredTransactions?.length ? (
+                    <div>
+                        <ScrollArea className="h-[80vh] rounded-md border border-slate-700 p-4">
+                            <table className="table-auto w-full">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Date</th>
+                                        <th>Amount</th>
+                                        <th>Category</th>
+                                        <th>Account</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filteredTransactions.map((transaction) => {
+                                        return (
+                                            <tr
+                                                className="m-0 border-t border-slate-200 p-0"
+                                                key={transaction.transaction_id}
+                                            >
+                                                <td className="text-left dark:border-slate-700 [&[align=center]]:text-center [&[align=right]]:text-right">
+                                                    {transaction.name}
+                                                </td>
+                                                <td className="text-left dark:border-slate-700 [&[align=center]]:text-center [&[align=right]]:text-right">
+                                                    {transaction.date.toLocaleDateString()}
+                                                </td>
+                                                <td className="text-left dark:border-slate-700 [&[align=center]]:text-center [&[align=right]]:text-right">
+                                                    {Math.sign(
+                                                        transaction.amount
+                                                    ) === 1 ? (
+                                                        <p className="text-red-500">
+                                                            $
+                                                            {transaction.amount}
+                                                        </p>
+                                                    ) : (
+                                                        <p className="text-green-500">
+                                                            $
+                                                            {Math.abs(
+                                                                transaction.amount
+                                                            )}
+                                                        </p>
+                                                    )}
+                                                </td>
+                                                <td className="text-left dark:border-slate-700 [&[align=center]]:text-center [&[align=right]]:text-right">
+                                                    {transaction.category}
+                                                </td>
+                                                <td className="text-left dark:border-slate-700 [&[align=center]]:text-center [&[align=right]]:text-right">
+                                                    {transaction.Account.name}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </ScrollArea>
                     </div>
-                </div>
-                <div className="">
-                    <ScrollArea className="h-[80vh] rounded-md border border-slate-700 p-4">
-                        <table className="table-auto w-full">
-                            <thead className="">
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Date</th>
-                                    <th>Amount</th>
-                                    <th>Category</th>
-                                    <th>Account</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {transactions.map((transaction) => {
-                                    return (
-                                        <tr
-                                            className="m-0 border-t border-slate-200 p-0"
-                                            key={transaction.transaction_id}
-                                        >
-                                            <td className="text-left dark:border-slate-700 [&[align=center]]:text-center [&[align=right]]:text-right">
-                                                {transaction.name}
-                                            </td>
-                                            <td className="text-left dark:border-slate-700 [&[align=center]]:text-center [&[align=right]]:text-right">
-                                                {transaction.date.toLocaleDateString()}
-                                            </td>
-                                            <td className="text-left dark:border-slate-700 [&[align=center]]:text-center [&[align=right]]:text-right">
-                                                {Math.sign(
-                                                    transaction.amount
-                                                ) === 1 ? (
-                                                    <p className="text-red-500">
-                                                        ${transaction.amount}
-                                                    </p>
-                                                ) : (
-                                                    <p className="text-green-500">
-                                                        $
-                                                        {Math.abs(
-                                                            transaction.amount
-                                                        )}
-                                                    </p>
-                                                )}
-                                            </td>
-                                            <td className="text-left dark:border-slate-700 [&[align=center]]:text-center [&[align=right]]:text-right">
-                                                {transaction.category}
-                                            </td>
-                                            <td className="text-left dark:border-slate-700 [&[align=center]]:text-center [&[align=right]]:text-right">
-                                                {transaction.Account.name}
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
-                    </ScrollArea>
-                </div>
+                ) : transactions?.length ? (
+                    <EmptyPlaceholder>
+                        <EmptyPlaceholder.Title>
+                            No transaction found
+                        </EmptyPlaceholder.Title>
+                        <EmptyPlaceholder.Description>
+                            Try searching for something else.
+                        </EmptyPlaceholder.Description>
+                    </EmptyPlaceholder>
+                ) : (
+                    <EmptyPlaceholder>
+                        <EmptyPlaceholder.Title>
+                            No transaction found
+                        </EmptyPlaceholder.Title>
+                        <EmptyPlaceholder.Description>
+                            You don&apos;t have any accounts added yet. Let&apos;s add one
+                        </EmptyPlaceholder.Description>
+                        <PlaidLink />
+                    </EmptyPlaceholder>
+                )}
             </div>
         </main>
     );

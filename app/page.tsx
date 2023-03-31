@@ -59,13 +59,11 @@ export default async function Home() {
         now.getFullYear()
     );
 
-    console.log(spendByCategory);
-
     return (
         <main>
             <div className="flex justify-between pb-5">
                 <h1 className="font-bold text-xl px-2 flex justify-between">
-                    Accounts
+                    Home
                 </h1>
                 <SyncTransactionsButton ids={ids} />
             </div>
