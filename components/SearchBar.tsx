@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import { useTransition } from "react";
 import FilterOptions from "./FilterOptions";
@@ -9,7 +9,7 @@ export default function SearchBar() {
     const [isPending, startTransition] = useTransition();
     const router = useRouter();
 
-    function onChange(e: { target: { value: any; }; }) {  
+    function onChange(e: { target: { value: any } }) {
         startTransition(() => {
             router.push("/transactions?search=" + e.target.value);
         });
@@ -17,7 +17,12 @@ export default function SearchBar() {
 
     return (
         <>
-            <Input placeholder="Search" type="search" onChange={onChange} defaultValue={""} />
+            <Input
+                placeholder="Search"
+                type="search"
+                onChange={onChange}
+                defaultValue={""}
+            />
             <div className="px-2">
                 <FilterOptions />
             </div>

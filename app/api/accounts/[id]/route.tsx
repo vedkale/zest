@@ -7,9 +7,10 @@ export async function DELETE(request: Request, context: { params: any }) {
                 id: +context.params.id,
             },
         });
-
-        return new Response(null, {status: 204});
+        return new Response(null, { status: 204 });
     } catch (error) {
-        console.error(`Account delete failed for id: ${context.params.id} with error ${error}`);
+        console.error(
+            `Account delete failed for id: ${context.params.id} with error ${error}`
+        );
     }
 }

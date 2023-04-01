@@ -18,7 +18,7 @@ export default async function Accounts() {
         <main>
             <div className="grid items-start gap-8">
                 <div className="flex justify-between">
-                    <h1 className="font-bold text-xl px-2 flex justify-between">
+                    <h1 className="flex justify-between px-2 text-xl font-bold">
                         Accounts
                     </h1>
                     <PlaidLink />

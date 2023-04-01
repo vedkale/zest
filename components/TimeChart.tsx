@@ -90,7 +90,7 @@ export default function TimeChart({
     data,
     labels,
     title,
-    subtitle
+    subtitle,
 }: {
     data: number[];
     labels: string[];

@@ -51,7 +51,7 @@ export default async function Transactions({
         <main className="max-h-3.5">
             <div className="grid items-start gap-4">
                 <div className="flex justify-between">
-                    <h1 className="font-bold text-xl px-2 flex justify-between">
+                    <h1 className="flex justify-between px-2 text-xl font-bold">
                         Transactions
                     </h1>
                 </div>
@@ -61,7 +61,7 @@ export default async function Transactions({
                 {filteredTransactions?.length ? (
                     <div>
                         <ScrollArea className="h-[80vh] rounded-md border border-slate-700 p-4">
-                            <table className="table-auto w-full">
+                            <table className="w-full table-auto">
                                 <thead>
                                     <tr>
                                         <th>Name</th>
@@ -129,7 +129,8 @@ export default async function Transactions({
                             No transaction found
                         </EmptyPlaceholder.Title>
                         <EmptyPlaceholder.Description>
-                            You don&apos;t have any accounts added yet. Let&apos;s add one
+                            You don&apos;t have any accounts added yet.
+                            Let&apos;s add one
                         </EmptyPlaceholder.Description>
                         <PlaidLink />
                     </EmptyPlaceholder>

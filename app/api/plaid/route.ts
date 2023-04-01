@@ -111,8 +111,6 @@ export async function POST(request: Request) {
                 },
             });
         });
-
-        // return NextResponse.json(accounts.data);
         return NextResponse.json(item);
     } catch (error) {
         if (error instanceof z.ZodError) {

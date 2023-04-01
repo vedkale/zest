@@ -12,7 +12,7 @@ export default function FilterOptions() {
     return (
         <>
             <DropdownMenu>
-                <DropdownMenuTrigger className="flex h-10 w-10 items-center justify-center rounded-md border transition-colors border-slate-700 hover:bg-slate-800">
+                <DropdownMenuTrigger className="flex h-10 w-10 items-center justify-center rounded-md border border-slate-700 transition-colors hover:bg-slate-800">
                     <Icons.vEllipsis className="h-4 w-4" />
                 </DropdownMenuTrigger>
             </DropdownMenu>

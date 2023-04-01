@@ -6,12 +6,12 @@ export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
 
-export function formatDollar(input: number | null): string {
+export function formatDollar(input: number | null, notation: "standard" | "scientific" | "engineering" | "compact" | undefined = "compact"): string {
     if (!input) return "$0";
     return input.toLocaleString("en-US", {
         style: "currency",
         currency: "USD",
-        notation: "compact",
+        notation: notation,
     });
 }
 

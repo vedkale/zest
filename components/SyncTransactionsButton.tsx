@@ -1,6 +1,5 @@
 "use client";
 
-import { db } from "@/lib/db";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -33,7 +32,7 @@ export function SyncTransactionsButton({ ids }: { ids: { id: number }[] }) {
 
     return (
         <button
-            className="bg-neutral-800 hover:bg-neutral-700 text-white rounded-md p-2"
+            className="rounded-md bg-neutral-800 p-2 text-white hover:bg-neutral-700"
             onClick={async (event) => {
                 event.preventDefault();
                 setIsSyncLoading(true);

@@ -6,23 +6,21 @@ import TimeChart from "@/components/TimeChart";
 import { SyncTransactionsButton } from "@/components/SyncTransactionsButton";
 import PieChart from "@/components/PieChart";
 
-const getTransactionsAggCurrentMonth = cache(
-    async (month: number, year: number) => {
-        //@ts-ignore
-        return db.transaction.groupBy({
-            by: ["date"],
-            where: {
-                date: {
-                    gt: new Date(year, month, 1),
-                    lt: new Date(year, month + 1, 1),
-                },
+const getTransactionsAgg = cache(async (month: number, year: number) => {
+    //@ts-ignore
+    return db.transaction.groupBy({
+        by: ["date"],
+        where: {
+            date: {
+                gt: new Date(year, month, 1),
+                lt: new Date(year, month + 1, 1),
             },
-            _sum: {
-                amount: true,
-            },
-        });
-    }
-);
+        },
+        _sum: {
+            amount: true,
+        },
+    });
+});
 
 const getTransactionsAggCategory = cache(
     async (month: number, year: number) => {
@@ -33,6 +31,11 @@ const getTransactionsAggCategory = cache(
                 date: {
                     gt: new Date(year, month, 1),
                     lt: new Date(year, month + 1, 1),
+                },
+                NOT: {
+                    category: {
+                        contains: "payment",
+                    },
                 },
             },
             _sum: {
@@ -51,51 +54,71 @@ export default async function Home() {
 
     const ids = await getIds();
 
-    const monthlySpend = cumsumDate(
-        await getTransactionsAggCurrentMonth(now.getMonth(), now.getFullYear())
+    const currentMonthSpend = cumsumDate(
+        await getTransactionsAgg(now.getMonth(), now.getFullYear())
     );
-    const spendByCategory = await getTransactionsAggCategory(
+    const prevMonthSpend = cumsumDate(
+        await getTransactionsAgg(now.getMonth() - 1, now.getFullYear())
+    );
+    const currentSpendByCategory = await getTransactionsAggCategory(
         now.getMonth(),
+        now.getFullYear()
+    );
+    const prevSpendByCategory = await getTransactionsAggCategory(
+        now.getMonth() - 1,
         now.getFullYear()
     );
 
     return (
         <main>
             <div className="flex justify-between pb-5">
-                <h1 className="font-bold text-xl px-2 flex justify-between">
+                <h1 className="flex justify-between px-2 text-xl font-bold">
                     Home
                 </h1>
                 <SyncTransactionsButton ids={ids} />
             </div>
-            {/* <div className="grid grid-flow-col gap-2"> */}
-            <div className="grid grid-flow-col auto-row-min gap-4">
-                <div className="border rounded-md border-slate-700">
+            <div className="grid grid-cols-2 gap-8">
+                <div className="rounded-md border border-slate-700">
                     <TimeChart
-                        data={monthlySpend.map((x) => {
+                        data={currentMonthSpend.map((x) => {
                             return x.amount;
                         })}
-                        labels={monthlySpend.map((x) => {
+                        labels={currentMonthSpend.map((x) => {
                             return x.date.toISOString();
                         })}
                         title={"Monthly Spend"}
-                        subtitle={`Spent: $${monthlySpend[monthlySpend.length - 1].amount}`}
+                        subtitle={`Spent: $${
+                            currentMonthSpend[currentMonthSpend.length - 1]
+                                .amount
+                        }`}
                     />
                 </div>
-                <div className="border rounded-md border-slate-700 max-h-fit">
+                <div className="max-h-fit rounded-md border border-slate-700">
                     <PieChart
-                        data={spendByCategory.map((x) => {
+                        data={currentSpendByCategory.map((x) => {
                             return x._sum.amount!;
                         })}
-                        labels={spendByCategory.map((x) => {
+                        labels={currentSpendByCategory.map((x) => {
                             return x.category!;
                         })}
-
                     />
                 </div>
-                {/* <div className="border rounded-md border-slate-700 p-2">
-                    <h1 className="">Stats</h1>
-                    <p>Month over month spend increase: 5%</p>
-                </div> */}
+                <div className="rounded-md border border-slate-700 p-5">
+                    <h1 className="py-1 font-bold">Spending Trends</h1>
+                    <p>
+                        Month over month spend increase:{" "}
+                        {(
+                            (100 *
+                                (currentMonthSpend[currentMonthSpend.length - 1]
+                                    .amount -
+                                    prevMonthSpend[prevMonthSpend.length - 1]
+                                        .amount)) /
+                            currentMonthSpend[currentMonthSpend.length - 1]
+                                .amount
+                        ).toPrecision(2)}
+                        %
+                    </p>
+                </div>
             </div>
         </main>
     );

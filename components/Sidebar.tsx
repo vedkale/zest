@@ -27,18 +27,18 @@ const navItems: { [pathname: string]: { name: string; y: number; w: string } } =
 export default function Sidebar() {
     let pathname = usePathname() || "/";
     return (
-        <aside className="font-sans flex-shrink-0 px-0 mx-0">
+        <aside className="mx-0 flex-shrink-0 px-0 font-sans">
             <div className="sticky">
                 <nav
-                    className="flex overflow-hidden flex-row md:flex-col items-start relative fade md:overflow-auto scroll-pr-6 md:relative"
+                    className="fade relative flex scroll-pr-6 flex-row items-start overflow-hidden md:relative md:flex-col md:overflow-auto"
                     id="nav"
                 >
-                    <div className="flex flex-col space-x-0 pr-10 mb-2 mt-2 md:mt-0">
+                    <div className="mb-2 mt-2 flex flex-col space-x-0 pr-10 md:mt-0">
                         {navItems[pathname] ? (
                             <>
                                 <div>
                                     <motion.div
-                                        className="absolute bg-neutral-100 dark:bg-neutral-800 h-[34px] rounded-md z-[-1]"
+                                        className="absolute z-[-1] h-[34px] rounded-md bg-neutral-100 dark:bg-neutral-800"
                                         layoutId="test2"
                                         initial={{
                                             opacity: 0,
@@ -66,7 +66,7 @@ export default function Sidebar() {
                                     href={path}
                                     key={path}
                                     className={clsx(
-                                        "transition-all hover:text-neutral-800 dark:hover:text-neutral-200 py-[5px] px-[10px]",
+                                        "py-[5px] px-[10px] transition-all hover:text-neutral-800 dark:hover:text-neutral-200",
                                         {
                                             "text-neutral-500": !isActive,
                                             "font-bold": isActive,
