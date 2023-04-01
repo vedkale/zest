@@ -34,7 +34,7 @@ export default function PlaidLink() {
                 body: JSON.stringify({
                     public_token: public_token,
                     institution_id: metadata.institution?.institution_id,
-                    institution_name: metadata.institution?.name
+                    institution_name: metadata.institution?.name,
                 }),
             });
             // forces a cache invalidation
@@ -68,7 +68,7 @@ export default function PlaidLink() {
     return (
         <>
             <button
-                className="bg-neutral-800 hover:bg-neutral-700 text-white rounded-md p-2"
+                className="rounded-md bg-neutral-800 p-2 text-white hover:bg-neutral-700"
                 onClick={() => {
                     open();
                 }}
