@@ -1,7 +1,8 @@
 "use client";
 
 import { formatDollar } from "@/lib/utils";
-import { ArcElement, Chart as ChartJS, Colors, Legend, Tooltip } from "chart.js";
+import { ArcElement, Chart as ChartJS, Colors, Legend } from "chart.js";
+import ChartDataLabels from "chartjs-plugin-datalabels";
 import { Doughnut } from "react-chartjs-2";
 
 ChartJS.register(ArcElement, Colors, Legend);
@@ -11,15 +12,10 @@ export const options = {
     layout: {
         padding: 20,
     },
-    aspectRatio: 0.8,
-    cutout: '75%',
-    radius: '80%',
-    ticks: {
-        // Include a dollar sign in the ticks
-        callback: function (value: any, index: any, ticks: any) {
-            return formatDollar(value);
-        },
-    },
+    maintainAspectRatio: false,
+    cutout: "70%",
+    radius: "100%",
+    ticks: {},
     plugins: {
         title: {
             display: true,
@@ -27,8 +23,21 @@ export const options = {
         },
         legend: {
             display: true,
-            position: 'right',
-        }
+            position: "right",
+            labels: {
+                color: "#FFFFFF",
+            },
+        },
+        datalabels: {
+            color: "#FFFFFF",
+            formatter: function (value: any, context: any) {
+                return formatDollar(value, "standard");
+            },
+            anchor: "end",
+            clamp: false,
+            align: "end",
+            rotation: 0,
+        },
     },
 };
 
@@ -45,7 +54,7 @@ export default function PieChart({
             {
                 fill: false,
                 labels: labels,
-                data: data
+                data: data,
             },
         ],
     };
@@ -54,7 +63,7 @@ export default function PieChart({
         <>
             {/* 
             // @ts-ignore god help ts */}
-            <Doughnut height={20} options={options} data={chartData} />
+            <Doughnut options={options} data={chartData} plugins={[ChartDataLabels]} />
         </>
     );
 }
