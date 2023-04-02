@@ -6,6 +6,7 @@ import {
     Transaction as PlaidTransaction,
     TransactionsSyncRequest,
 } from "plaid";
+import { cache } from "react";
 import { z } from "zod";
 
 const transactionCreateSchema = z.object({
@@ -22,18 +23,23 @@ const transactionCreateSchema = z.object({
     transaction_id: z.string(),
 });
 
-export async function POST(request: Request, context: { params: any }) {
-    console.log("MEOW");
+const getItem = cache(async (id: number) => {
+    return await db.item.findUnique({
+        where: {
+            id: +id,
+        },
+    })
+});
+
+export async function GET(request: Request, context: { params: any }) {
+    // console.log("MEOW");
     try {
+        var startTime = performance.now();
         const { searchParams } = new URL(request.url);
         const id = searchParams.get("id");
         if (!id) return new Response("id is null", { status: 400 });
 
-        const item = await db.item.findUnique({
-            where: {
-                id: +id,
-            },
-        });
+        const item = await getItem(+id);
 
         if (!item) {
             throw new Error("Item not found.");
@@ -65,10 +71,15 @@ export async function POST(request: Request, context: { params: any }) {
             cursor = data.next_cursor;
         }
 
-        // if (!(added || modified || removed))
-        //     return NextResponse.json({}, { status: 204 });
-
-        var startTime = performance.now();
+        if (!(added.length || modified.length || removed.length))
+        {
+            console.info(`No new transactions. time: ${performance.now() - startTime}ms`);
+            return NextResponse.json({
+                added: added.length,
+                removed: removed.length,
+                updated: modified.length,
+            });
+        }
 
         //upsert probbly
         added.map(async (transaction) => {
@@ -120,8 +131,7 @@ export async function POST(request: Request, context: { params: any }) {
             },
         });
 
-        var endTime = performance.now();
-        console.info(`Call for puts took ${endTime - startTime} milliseconds`);
+        console.info(`Call for puts took ${performance.now() - startTime} milliseconds`);
 
         return NextResponse.json({
             added: added.length,

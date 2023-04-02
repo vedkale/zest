@@ -16,7 +16,7 @@ export async function GET(request: Request) {
             client_user_id: "user-id",
         },
         client_name: "Plaid Test App",
-        products: [Products.Transactions],
+        products: [Products.Transactions, Products.Liabilities],
         country_codes: [CountryCode.Us],
         language: "en",
     };

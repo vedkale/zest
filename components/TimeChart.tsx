@@ -88,11 +88,13 @@ export const options = {
 //data: number[], labels: string[]
 export default function TimeChart({
     data,
+    prevData,
     labels,
     title,
     subtitle,
 }: {
     data: number[];
+    prevData: number[];
     labels: string[];
     title: string;
     subtitle: string;
@@ -102,6 +104,9 @@ export default function TimeChart({
     const dateData = data.map((x) => {
         return new Date(x);
     });
+    const prevDateData = prevData.map((x) => {
+        return new Date(x);
+    });
     const chartData = {
         labels: labels,
         datasets: [
@@ -109,8 +114,15 @@ export default function TimeChart({
                 label: "Monthly Spend",
                 data: dateData,
                 borderColor: "rgb(255, 99, 132)",
-                backgroundColor: "rgba(0, 99, 132, 0.5)",
+                backgroundColor: "rgba(0, 99, 132, 1)",
                 tension: 0.3,
+            },
+            {
+                label: "Prev Spend",
+                data: prevDateData,
+                borderColor: "rgb(255, 255, 255)",
+                backgroundColor: "rgba(0, 99, 132, 0.5)",
+                tension: 0,
             },
         ],
     };

@@ -5,6 +5,7 @@ import {
     Circle,
     Loader,
     Trash,
+    RotateCw
 } from "react-feather";
 
 export const Icons = {
@@ -14,4 +15,5 @@ export const Icons = {
     circle: Circle,
     spinner: Loader,
     trash: Trash,
+    refresh: RotateCw
 };

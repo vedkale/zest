@@ -14,7 +14,7 @@ export const options = {
     },
     maintainAspectRatio: false,
     cutout: "70%",
-    radius: "100%",
+    radius: "80%",
     ticks: {},
     plugins: {
         title: {

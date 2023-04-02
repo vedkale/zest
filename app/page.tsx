@@ -1,10 +1,14 @@
 import { db } from "@/lib/db";
 import { cache } from "react";
-import useSWR from "swr";
 import { cumsumDate } from "@/lib/utils";
 import TimeChart from "@/components/TimeChart";
 import { SyncTransactionsButton } from "@/components/SyncTransactionsButton";
 import PieChart from "@/components/PieChart";
+import { EmptyPlaceholder } from "@/components/EmptyPlaceholder";
+import PlaidLink from "@/components/PlaidLink";
+import clsx from "clsx";
+import { client } from "@/lib/plaidClient";
+import Sankey from "@/components/SankeyDiagram";
 
 const getTransactionsAgg = cache(async (month: number, year: number) => {
     //@ts-ignore
@@ -45,6 +49,29 @@ const getTransactionsAggCategory = cache(
     }
 );
 
+const sankeyData = cache(
+    async (month: number, year: number) => {
+        //@ts-ignore
+        return await db.transaction.groupBy({
+            by: ["category", "subcategory"],
+            where: {
+                date: {
+                    gt: new Date(year, month, 1),
+                    lt: new Date(year, month + 1, 1),
+                },
+                // NOT: {
+                //     category: {
+                //         contains: "payment",
+                //     },
+                // },
+            },
+            _sum: {
+                amount: true,
+            },
+        });
+    }
+);
+
 const getIds = cache(async () => {
     return await db.item.findMany({ select: { id: true } });
 });
@@ -55,19 +82,25 @@ export default async function Home() {
     const ids = await getIds();
 
     const currentMonthSpend = cumsumDate(
-        await getTransactionsAgg(now.getMonth(), now.getFullYear())
-    );
-    const prevMonthSpend = cumsumDate(
         await getTransactionsAgg(now.getMonth() - 1, now.getFullYear())
     );
-    const currentSpendByCategory = await getTransactionsAggCategory(
-        now.getMonth(),
-        now.getFullYear()
+    const prevMonthSpend = cumsumDate(
+        await getTransactionsAgg(now.getMonth() - 2, now.getFullYear())
     );
-    const prevSpendByCategory = await getTransactionsAggCategory(
+    const currentSpendByCategory = await getTransactionsAggCategory(
         now.getMonth() - 1,
         now.getFullYear()
     );
+    const prevSpendByCategory = await getTransactionsAggCategory(
+        now.getMonth() - 2,
+        now.getFullYear()
+    );
+
+    const sankey = await sankeyData(now.getMonth() - 1, now.getFullYear());
+    // console.log(sankey);
+
+    const response = await client.categoriesGet({});
+    const categories = response.data.categories;
 
     return (
         <main>
@@ -77,10 +110,29 @@ export default async function Home() {
                 </h1>
                 <SyncTransactionsButton ids={ids} />
             </div>
+            <div
+                className={clsx("", {
+                    hidden: ids.length > 0,
+                })}
+            >
+                <EmptyPlaceholder>
+                    <EmptyPlaceholder.Title>
+                        No Accounts found
+                    </EmptyPlaceholder.Title>
+                    <EmptyPlaceholder.Description>
+                        You don&apos;t have any accounts added yet. Let&apos;s
+                        add one
+                    </EmptyPlaceholder.Description>
+                    <PlaidLink />
+                </EmptyPlaceholder>
+            </div>
             <div className="grid grid-cols-2 gap-8">
                 <div className="rounded-md border border-slate-700">
                     <TimeChart
                         data={currentMonthSpend.map((x) => {
+                            return x.amount;
+                        })}
+                        prevData={prevMonthSpend.map((x) => {
                             return x.amount;
                         })}
                         labels={currentMonthSpend.map((x) => {
@@ -89,7 +141,7 @@ export default async function Home() {
                         title={"Monthly Spend"}
                         subtitle={`Spent: $${
                             currentMonthSpend[currentMonthSpend.length - 1]
-                                .amount
+                                ?.amount
                         }`}
                     />
                 </div>
@@ -106,18 +158,20 @@ export default async function Home() {
                 <div className="rounded-md border border-slate-700 p-5">
                     <h1 className="py-1 font-bold">Spending Trends</h1>
                     <p>
-                        Month over month spend increase:{" "}
-                        {(
+                        Month over month spend increase:
+                        {`${(
                             (100 *
                                 (currentMonthSpend[currentMonthSpend.length - 1]
-                                    .amount -
+                                    ?.amount -
                                     prevMonthSpend[prevMonthSpend.length - 1]
-                                        .amount)) /
+                                        ?.amount)) /
                             currentMonthSpend[currentMonthSpend.length - 1]
-                                .amount
-                        ).toPrecision(2)}
-                        %
+                                ?.amount
+                        ).toPrecision(2)}%`}
                     </p>
+                </div>
+                <div>
+                    <Sankey data={sankey} />
                 </div>
             </div>
         </main>

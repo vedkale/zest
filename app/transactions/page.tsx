@@ -5,6 +5,7 @@ import SearchBar from "@/components/SearchBar";
 import { Account, Transaction } from "@prisma/client";
 import { EmptyPlaceholder } from "@/components/EmptyPlaceholder";
 import PlaidLink from "@/components/PlaidLink";
+import { SyncTransactionsButton } from "@/components/SyncTransactionsButton";
 
 const getTransactions = cache(async () => {
     return await db.transaction.findMany({
@@ -36,11 +37,16 @@ function filterTransaction(
     });
 }
 
+const getIds = cache(async () => {
+    return await db.item.findMany({ select: { id: true } });
+});
+
 export default async function Transactions({
     searchParams,
 }: {
     searchParams: { [key: string]: string | string[] | undefined };
 }) {
+    const ids = await getIds();
     const transactions = await getTransactions();
     const filteredTransactions = filterTransaction(
         transactions,
@@ -54,6 +60,7 @@ export default async function Transactions({
                     <h1 className="flex justify-between px-2 text-xl font-bold">
                         Transactions
                     </h1>
+                    <SyncTransactionsButton ids={ids} />
                 </div>
                 <div className="flex flex-row">
                     <SearchBar />

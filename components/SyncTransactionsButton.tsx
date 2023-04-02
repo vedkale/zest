@@ -2,11 +2,15 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Icons } from "./Icons";
 
 async function syncTransactions(ids: { id: number }[]) {
     const res = ids.map(async (id) => {
         const response = fetch(`/api/transactions/?id=${id.id}`, {
-            method: "POST",
+            method: "GET",
+            next: {
+                revalidate: 120,
+            },
         });
 
         return response;
@@ -45,7 +49,12 @@ export function SyncTransactionsButton({ ids }: { ids: { id: number }[] }) {
                 }
             }}
         >
-            Sync Transactions
+            {isSyncLoading ? (
+                <Icons.spinner className="h-5 w-5 animate-spin" />
+            ) : (
+                <Icons.refresh className="h-5 w-5" />
+            )}
+            {/* <span>Sync Transactions</span> */}
         </button>
     );
 }
