@@ -22,9 +22,9 @@ export default function RootLayout({
     return (
         <html
             lang="en"
-            className={`bg-[#121212] text-white ${roboto_mono.variable}`}
+            className={`bg-[#121212] text-white ${roboto_mono.variable} mr-2`}
         >
-            <body className="mb-40 flex pl-4 pt-10 pr-4 antialiased">
+            <body className="mb-40 flex pl-4 pr-4 pt-10 antialiased">
                 <Sidebar />
                 <main className="mt-0 flex min-w-fit flex-auto flex-col px-0">
                     {children}

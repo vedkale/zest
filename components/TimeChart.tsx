@@ -2,136 +2,94 @@
 
 import { formatDollar } from "@/lib/utils";
 import {
-    Chart as ChartJS,
-    LineElement,
-    LinearScale,
-    PointElement,
-    Tooltip,
-    TimeScale,
-    Title,
-    SubTitle,
-} from "chart.js";
-import "chartjs-adapter-date-fns";
-import { Line } from "react-chartjs-2";
+    LineChart,
+    Line,
+    XAxis,
+    YAxis,
+    Legend,
+    ResponsiveContainer,
+    Label,
+} from "recharts";
 
-ChartJS.register(
-    TimeScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    SubTitle,
-    Title,
-    Tooltip
-);
-
-const date = new Date();
-
-export const options = {
-    responsive: true,
-    layout: {
-        padding: 20,
-    },
-    plugins: {
-        legend: {
-            display: false,
-        },
-        tooltip: {
-            enabled: false,
-        },
-        title: {
-            display: true,
-            text: "Monthly Spend",
-        },
-        subtitle: {
-            display: true,
-            text: "Chart Subtitle",
-        },
-    },
-    scales: {
-        x: {
-            type: "time",
-            time: {
-                unit: "day",
-            },
-            grid: {
-                display: false,
-            },
-            border: {
-                color: "white",
-            },
-        },
-        y: {
-            type: "linear",
-            beginAtZero: true,
-            display: true,
-            ticks: {
-                // Include a dollar sign in the ticks
-                callback: function (value: any, index: any, ticks: any) {
-                    return formatDollar(value);
-                },
-            },
-            grid: {
-                display: false,
-            },
-            border: {
-                color: "white",
-            },
-        },
-    },
-    elements: {
-        point: {
-            radius: 0,
-        },
-    },
-};
-
-//data: number[], labels: string[]
 export default function TimeChart({
     data,
     prevData,
-    labels,
-    title,
-    subtitle,
+    currentMonth,
+    prevMonth,
 }: {
-    data: number[];
-    prevData: number[];
-    labels: string[];
-    title: string;
-    subtitle: string;
+    data: {
+        date: string;
+        amount: number;
+    }[];
+    prevData: {
+        date: string;
+        amount: number;
+    }[];
+    currentMonth: string;
+    prevMonth: string;
 }) {
-    options.plugins.title.text = title;
-    options.plugins.subtitle.text = subtitle;
-    const dateData = data.map((x) => {
-        return new Date(x);
+    const a = data.map((d) => {
+        return {
+            date: d.date,
+            amount: d.amount,
+        };
     });
-    const prevDateData = prevData.map((x) => {
-        return new Date(x);
-    });
-    const chartData = {
-        labels: labels,
-        datasets: [
-            {
-                label: "Monthly Spend",
-                data: dateData,
-                borderColor: "rgb(255, 99, 132)",
-                backgroundColor: "rgba(0, 99, 132, 1)",
-                tension: 0.3,
-            },
-            {
-                label: "Prev Spend",
-                data: prevDateData,
-                borderColor: "rgb(255, 255, 255)",
-                backgroundColor: "rgba(0, 99, 132, 0.5)",
-                tension: 0,
-            },
-        ],
-    };
+    const chartData = [
+        {
+            name: currentMonth,
+            data: data.map((d) => {
+                return {
+                    date: new Date(d.date).getUTCDate(),
+                    amount: d.amount,
+                };
+            }),
+        },
+        {
+            name: prevMonth,
+            data: prevData.map((d) => {
+                return {
+                    date: new Date(d.date).getUTCDate(),
+                    amount: d.amount - Math.random() * 200,
+                };
+            }),
+        },
+    ];
 
     return (
         <>
-            {/* 
-            // @ts-ignore god help ts */}
-            <Line options={options} data={chartData} />
+            <ResponsiveContainer aspect={2}>
+                <LineChart
+                    // width={500}
+                    // height={300}
+                    data={chartData}
+                    margin={{ top: 20 }}
+                    desc="HEHEHEH"
+                >
+                    <Label value="P"></Label>
+                    <XAxis
+                        domain={["auto", "auto"]}
+                        type="number"
+                        dataKey="date"
+                        tick={false}
+                    />
+                    <YAxis />
+                    <Legend />
+                    {chartData.map((s) => (
+                        <Line
+                            dataKey="amount"
+                            data={s.data}
+                            name={s.name}
+                            key={s.name}
+                            dot={false}
+                            strokeWidth={s.name === currentMonth ? 3 : 1}
+                            opacity={s.name === currentMonth ? 1 : 0.5}
+                            stroke={
+                                s.name === currentMonth ? "#8884d8" : "#82ca9d"
+                            }
+                        />
+                    ))}
+                </LineChart>
+            </ResponsiveContainer>
         </>
     );
 }

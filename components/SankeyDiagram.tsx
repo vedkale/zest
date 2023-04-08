@@ -1,13 +1,98 @@
 "use client";
 
 import { Prisma } from "@prisma/client";
-import { Chart } from "chart.js";
-import { SankeyController, Flow } from "chartjs-chart-sankey";
-// import ChartDataLabels from "chartjs-plugin-datalabels";
+import {
+    Layer,
+    Rectangle,
+    ResponsiveContainer,
+    Sankey,
+    Tooltip,
+} from "recharts";
 
-// Chart.register(SankeyController, Flow);
+const MyCustomNode = ({
+    x,
+    y,
+    width,
+    height,
+    index,
+    payload,
+    containerWidth,
+}: {
+    x: any;
+    y: any;
+    width: any;
+    height: any;
+    index: any;
+    payload: any;
+    containerWidth: any;
+}) => {
+    const isOut = x + width + 6 > containerWidth;
+    return (
+        <Layer key={`CustomNode${index}`}>
+            <Rectangle
+                x={x}
+                y={y}
+                width={width}
+                height={height}
+                fill="#5192ca"
+                fillOpacity="1"
+            />
+            <text
+                textAnchor={isOut ? "end" : "start"}
+                x={isOut ? x - 6 : x + width + 6}
+                y={y + height / 2}
+                fontSize="14"
+                // stroke="#FFF"
+                fill="#FFF"
+            >
+                {payload.name}
+            </text>
+            <text
+                textAnchor={isOut ? "end" : "start"}
+                x={isOut ? x - 6 : x + width + 6}
+                y={y + height / 2 + 13}
+                fontSize="12"
+                // stroke="#FFF"
+                strokeOpacity="1"
+                fill="#FFF"
+            >
+                {`$${payload.value}`}
+            </text>
+        </Layer>
+    );
+};
 
-export default function Sankey({
+function createMappings(
+    data: (Prisma.PickArray<
+        Prisma.TransactionGroupByOutputType,
+        ("category" | "subcategory")[]
+    > & {
+        _sum: {
+            amount: number | null;
+        };
+    })[]
+) {
+    const mappings: { [key: string]: number } = {};
+    var count = 1;
+    var total = 0;
+    mappings["Income"] = 0;
+    for (const d of data) {
+        const category = d.category || "Uncategorized";
+        const subcategory = d.subcategory || "Uncategorized";
+        if (!mappings[category]) {
+            mappings[category] = count;
+            count++;
+        }
+        if (!mappings[subcategory]) {
+            mappings[subcategory] = count;
+            count++;
+        }
+        total += d._sum.amount || 0;
+    }
+    return { mappings, total };
+}
+
+export default function SankeyDiagram({
     data,
 }: {
     data: (Prisma.PickArray<
@@ -19,66 +104,55 @@ export default function Sankey({
         };
     })[];
 }) {
-    // const flows = data.map((d) => {
-    //     return {
-    //         from: d.category,
-    //         to: d.subcategory,
-    //         flow: d._sum.amount,
-    //     };
-    // });
-
-    // console.log("flows", flows);
-
-    const colors: { [key: string]: string } = {
-        a: "red",
-        b: "green",
-        c: "blue",
-        d: "gray",
-    };
-
-    const getColor = (key: string) => {
-        return colors[key];
-    };
+    const mappingData = createMappings(data);
+    const { mappings, total } = mappingData;
 
     const chartData = {
-        datasets: [
-            {
-                label: "My sankey",
-                data: [
-                    { from: "a", to: "b", flow: 10 },
-                    { from: "a", to: "c", flow: 5 },
-                    { from: "b", to: "c", flow: 10 },
-                    { from: "d", to: "c", flow: 7 },
-                ],
-                // colorFrom: (c: any) => getColor(c.dataset.data[c.dataIndex].from),
-                // colorTo: (c: any) => getColor(c.dataset.data[c.dataIndex].to),
-                colorMode: "gradient", // or 'from' or 'to'
-                /* optional labels */
-                labels: {
-                    a: "Label A",
-                    b: "Label B",
-                    c: "Label C",
-                    d: "Label D",
+        nodes: Object.keys(mappings).map((key) => ({ name: key })),
+        links: [
+            ...data.flatMap((d) => [
+                {
+                    source: mappings[d.category ?? "Uncategorized"],
+                    target: mappings[d.subcategory ?? "Uncategorized"],
+                    value: d._sum.amount,
                 },
-                /* optional priority */
-                priority: {
-                    b: 1,
-                    d: 0,
+                {
+                    source: mappings["Income"],
+                    target: mappings[d.category ?? "Uncategorized"],
+                    value: d._sum.amount,
                 },
-                /* optional column overrides */
-                column: {
-                    d: 1,
-                },
-                size: "max", // or 'min' if flow overlap is preferred
-            },
+            ]),
         ],
     };
 
-    // const chart = new Chart(ctx, {
-    //     type: "sankey",
-    //     data: {},
-    // });
+    const tmp = chartData.links.map((l) => ({
+        source: chartData.nodes[l.source].name,
+        target: chartData.nodes[l.target].name,
+        value: l.value,
+    }));
 
-    // return <Chart type="sankey" data={chartData} options={}/>;
-    return (<></>);
+    return (
+        <>
+            <ResponsiveContainer aspect={16/9}>
+                <Sankey
+                    width={960}
+                    height={500}
+                    data={chartData}
+                    //@ts-expect-error
+                    node={<MyCustomNode />}
+                    // node={{ stroke: "#77c878", strokeWidth: 2 }}
+                    nodePadding={50}
+                    margin={{
+                        left: 100,
+                        right: 200,
+                        top: 50,
+                        bottom: 50,
+                    }}
+                    link={{ stroke: "#77c878" }}
+                >
+                    {/* <Tooltip /> */}
+                </Sankey>
+            </ResponsiveContainer>
+        </>
+    );
 }

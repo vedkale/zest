@@ -1,11 +1,6 @@
 "use client";
 
 import { formatDollar } from "@/lib/utils";
-import { ArcElement, Chart as ChartJS, Colors, Legend } from "chart.js";
-import ChartDataLabels from "chartjs-plugin-datalabels";
-import { Doughnut } from "react-chartjs-2";
-
-ChartJS.register(ArcElement, Colors, Legend);
 
 export const options = {
     responsive: true,
@@ -61,9 +56,6 @@ export default function PieChart({
 
     return (
         <>
-            {/* 
-            // @ts-ignore god help ts */}
-            <Doughnut options={options} data={chartData} plugins={[ChartDataLabels]} />
         </>
     );
 }
