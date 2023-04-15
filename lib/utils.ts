@@ -44,3 +44,18 @@ export function amountSign(accountType: string) {
     if (accountType === "depository") return -1;
     return 1;
 }
+
+export const Months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+];

@@ -50,7 +50,7 @@ export default function AccountOperations({
     return (
         <>
             <DropdownMenu>
-                <DropdownMenuTrigger>
+                <DropdownMenuTrigger className="flex h-8 w-8 items-center justify-center rounded-md border transition-colors hover:bg-slate-50">
                     <Icons.vEllipsis className="h-4 w-4" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
@@ -69,7 +69,7 @@ export default function AccountOperations({
                 <AlertDialogContent>
                     <AlertDialogHeader>
                         <AlertDialogTitle>
-                            Are you sure you want to delete this link?
+                            Are you sure you want to delete this connection?
                         </AlertDialogTitle>
                         <AlertDialogDescription>
                             This action cannot be undone.

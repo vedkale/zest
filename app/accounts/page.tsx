@@ -11,6 +11,8 @@ const getAccounts = cache(async () => {
     });
 });
 
+//TODO: Add fetch for updating account refreshs every 5 minutes?
+
 export default async function Accounts() {
     const accountData = await getAccounts();
 
