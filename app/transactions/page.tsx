@@ -1,24 +1,26 @@
-import { db } from "@/lib/db";
-import { cache } from "react";
-import { ScrollArea } from "@/components/ui/ScrollArea";
-import SearchBar from "@/components/SearchBar";
-import { Account, Transaction } from "@prisma/client";
-import { EmptyPlaceholder } from "@/components/EmptyPlaceholder";
-import PlaidLink from "@/components/PlaidLink";
-import { SyncTransactionsButton } from "@/components/SyncTransactionsButton";
+import { db } from '@/lib/db';
+import { cache } from 'react';
+import { ScrollArea } from '@/components/ui/ScrollArea';
+import SearchBar from '@/components/SearchBar';
+import { Account, Transaction } from '@prisma/client';
+import { EmptyPlaceholder } from '@/components/EmptyPlaceholder';
+import PlaidLink from '@/components/PlaidLink';
+import { SyncTransactionsButton } from '@/components/SyncTransactionsButton';
 
-const getTransactions = cache(async () => {
+const sortByStates: {[key: string]: string}[] = [{ date: 'desc' }, { amount: 'desc' }, { amount: 'asc' }];
+
+const getTransactions = cache(async (sortBy: { [key: string]: string }) => {
     return await db.transaction.findMany({
         include: {
             Account: true,
         },
         orderBy: {
-            date: "desc",
+            ...sortBy,
         },
     });
 });
 
-function filterTransaction(
+function searchTransaction(
     transactions: (Transaction & {
         Account: Account;
     })[],
@@ -26,32 +28,47 @@ function filterTransaction(
 ) {
     const keywords = search
         .toLowerCase()
-        .split(" ")
-        .filter((s) => s !== "");
+        .split(' ')
+        .filter((s) => s !== '');
     if (keywords.length === 0) {
         return transactions;
     }
+
     return transactions.filter((transaction) => {
-        const words = transaction.name.toLowerCase().split(" ");
+        const words = transaction.name.toLowerCase().split(' ');
         return keywords.every((kw) => words.some((w) => w.includes(kw)));
     });
 }
 
-const getIds = cache(async () => {
-    return await db.item.findMany({ select: { id: true } });
-});
+function createUniqueFilterValues(
+    transactions: (Transaction & {
+        Account: Account;
+    })[]
+) {
+    const accounts: Set<string> = new Set();
+    const categories: Set<string> = new Set();
+    for (let i = 0; i < transactions.length; i++) {
+        accounts.add(transactions[i].Account.name);
+        categories.add(transactions[i].category ?? 'Uncategorized');
+    }
+    return {
+        accounts: Array.from(accounts),
+        categories: Array.from(categories),
+    };
+}
 
 export default async function Transactions({
     searchParams,
 }: {
-    searchParams: { [key: string]: string | string[] | undefined };
+    searchParams: { search: string; sort: string };
 }) {
-    const ids = await getIds();
-    const transactions = await getTransactions();
-    const filteredTransactions = filterTransaction(
-        transactions,
-        (searchParams.search as string) ?? ""
-    );
+    const search = searchParams.search ?? '';
+    const sort = +searchParams.sort ?? 0;
+    const transactions = await getTransactions(sortByStates[sort]);
+    const filteredTransactions = searchTransaction(transactions, search);
+    // const filteredTransactions = transactions;
+
+    const uniqueFilterValues = createUniqueFilterValues(transactions);
 
     return (
         <main className="max-h-3.5">
@@ -60,10 +77,14 @@ export default async function Transactions({
                     <h1 className="flex justify-between px-2 text-xl font-bold">
                         Transactions
                     </h1>
-                    <SyncTransactionsButton ids={ids} />
+                    {/* <SyncTransactionsButton ids={ids} /> */}
                 </div>
                 <div className="flex flex-row">
-                    <SearchBar />
+                    <SearchBar
+                        searchValue={search}
+                        accounts={uniqueFilterValues.accounts}
+                        categories={uniqueFilterValues.categories}
+                    />
                 </div>
                 {filteredTransactions?.length ? (
                     <div>
