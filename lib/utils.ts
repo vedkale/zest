@@ -92,7 +92,6 @@ export function filterTransactions(
         });
     }
     if (filterArr.Category) {
-        console.log('a', filterArr.Category);
         filteredTransactions = filteredTransactions.filter((transaction) => {
             return filterArr.Category.some((f) => transaction.category === f);
         });

@@ -66,7 +66,6 @@ export default function SearchBar({
     }
 
     useEffect(() => {
-        // console.log('apple');
         startTransition(() => {
             router.replace(
                 `/transactions?${createQueryString(
@@ -80,7 +79,6 @@ export default function SearchBar({
     }, [sortState]);
 
     useEffect(() => {
-        // console.log('ball');
         startTransition(() => {
             router.replace(
                 `/transactions?${Array.from(filterQuery).map((item) => createQueryString('filter', item)).join('&')}`
