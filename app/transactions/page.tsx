@@ -6,7 +6,7 @@ import { Account, Transaction } from '@prisma/client';
 import { EmptyPlaceholder } from '@/components/EmptyPlaceholder';
 import PlaidLink from '@/components/PlaidLink';
 import { SyncTransactionsButton } from '@/components/SyncTransactionsButton';
-import { searchTransactions } from '@/lib/utils';
+import { filterTransactions, queryParamsToFilterValues, searchTransactions } from '@/lib/utils';
 
 const sortByStates: { [key: string]: string }[] = [
     { date: 'desc' },
@@ -19,19 +19,17 @@ const getTransactions = cache(async (sortBy: { [key: string]: string }) => {
         include: {
             Account: true,
         },
-        // where: {
-        //     category: {
-        //         in: filter
-        //     },
-        //     Account: {
-        //         name: {
-        //             in: filter
-        //         }
-        //     }
-        // },
         orderBy: {
             ...sortBy,
         },
+    });
+});
+
+const getItemIds = cache(async () => {
+    return await db.item.findMany({
+        select: {
+            id: true
+        }
     });
 });
 
@@ -57,17 +55,19 @@ const createUniqueFilterValues = cache(
 export default async function Transactions({
     searchParams,
 }: {
-    searchParams: { search: string; sort: string; filter: string[] };
+    searchParams: { search: string; sort: string; filter: string[] | string };
 }) {
     const search = searchParams.search ?? '';
     const sort = +searchParams.sort ?? 0;
-    const filter = searchParams.filter;
+    const filter = queryParamsToFilterValues(searchParams.filter);
 
     const transactions = await getTransactions(sortByStates[sort]);
-    const filteredTransactions = searchTransactions(transactions, search);
-    const uniqueFilterValues = createUniqueFilterValues(transactions);
+    const itemIds = await getItemIds();
 
-    console.log(filter);
+    var filteredTransactions = filterTransactions(transactions, filter);
+    filteredTransactions = searchTransactions(filteredTransactions, search);
+    const uniqueFilterValues = createUniqueFilterValues(transactions);
+    
 
     return (
         <main className='max-h-3.5'>
@@ -76,7 +76,7 @@ export default async function Transactions({
                     <h1 className='flex justify-between px-2 text-xl font-bold'>
                         Transactions
                     </h1>
-                    {/* <SyncTransactionsButton ids={ids} /> */}
+                    <SyncTransactionsButton ids={itemIds} />
                 </div>
                 <SearchBar
                     searchValue={search}
@@ -85,7 +85,7 @@ export default async function Transactions({
                 />
                 {filteredTransactions?.length ? (
                     <div>
-                        <ScrollArea className='h-[80vh] rounded-md border border-slate-700 p-4'>
+                        <ScrollArea className='h-[75vh] rounded-md border border-slate-700 p-4 max-h-full'>
                             <table className='w-full table-auto'>
                                 <thead>
                                     <tr>

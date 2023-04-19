@@ -83,10 +83,7 @@ export default function SearchBar({
         // console.log('ball');
         startTransition(() => {
             router.replace(
-                `/transactions?${createQueryString(
-                    'filter',
-                    Array.from(filterQuery).toString()
-                )}`
+                `/transactions?${Array.from(filterQuery).map((item) => createQueryString('filter', item)).join('&')}`
             );
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -124,7 +121,7 @@ export default function SearchBar({
                                                                         new Set(
                                                                             filterQuery
                                                                         ).add(
-                                                                            item
+                                                                            `${heading}-${item}`
                                                                         )
                                                                     );
                                                                 }}
@@ -205,7 +202,7 @@ export default function SearchBar({
                                     setFilterQuery(new Set(filterQuery));
                                 }}
                             >
-                                {item}
+                                {item.split('-')[1]}
                                 <Icons.X className='ml-1 h-4 w-4' />
                             </button>
                         );

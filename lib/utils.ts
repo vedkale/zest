@@ -78,20 +78,46 @@ export function filterTransactions(
     transactions: (Transaction & {
         Account: Account;
     })[],
-    filterArr: string[]
+    filterArr: { [key: string]: string[] }
 ) {
-    // if (!filterArr) {
-    //     return transactions;
-    // }
-
-    const words = ['Plaid Checking'];
-    return transactions
-        .filter((transaction) => {
-            return words.some((kw) => transaction.Account.name === kw);
-        })
-        .filter((transaction) => {
-            return words.some((kw) => transaction.category === kw);
+    if (!filterArr) {
+        return transactions;
+    }
+    var filteredTransactions = transactions;
+    if (filterArr.Account) {
+        filteredTransactions = filteredTransactions.filter((transaction) => {
+            return filterArr.Account.some(
+                (f) => transaction.Account.name === f
+            );
         });
+    }
+    if (filterArr.Category) {
+        console.log('a', filterArr.Category);
+        filteredTransactions = filteredTransactions.filter((transaction) => {
+            return filterArr.Category.some((f) => transaction.category === f);
+        });
+    }
+
+    return filteredTransactions;
+}
+
+export function queryParamsToFilterValues(params: string[] | string) {
+    if (!params) {
+        return {};
+    }
+
+    if (typeof params === 'string') {
+        params = [params];
+    }
+
+    const obj: { [key: string]: string[] } = {};
+
+    for (let i = 0; i < params.length; i++) {
+        const [a, b] = params[i].split('-');
+        obj[a] = [...(obj[a] || []), b];
+    }
+
+    return obj;
 }
 
 export const Months = [
