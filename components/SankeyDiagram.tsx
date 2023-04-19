@@ -148,7 +148,7 @@ export default function SankeyDiagram({
                         top: 50,
                         bottom: 50,
                     }}
-                    link={{ stroke: "#77c878" }}
+                    link={{ stroke: "#8884d8" }}
                 >
                     {/* <Tooltip /> */}
                 </Sankey>
