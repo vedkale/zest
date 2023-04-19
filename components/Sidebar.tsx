@@ -22,6 +22,11 @@ const navItems: { [pathname: string]: { name: string; y: number; w: string } } =
             y: 68,
             w: "92px",
         },
+        "/budget": {
+            name: "Budget",
+            y: 103,
+            w: "76px",
+        }
     };
 
 export default function Sidebar() {
