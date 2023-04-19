@@ -13,7 +13,7 @@ export default function AccountSet({
 }) {
     return (
         <>
-            <div className="divide-y divide-neutral-200 rounded-xl border border-slate-300">
+            <div className="divide-y divide-neutral-700 rounded-xl border-2 border-slate-700">
                 <div className="flex items-center justify-between p-4">
                     <div className="grid gap-1">
                         <p>{institution_name}</p>
