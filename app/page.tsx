@@ -26,29 +26,6 @@ const getTransactionsAgg = cache(async (month: number, year: number) => {
     });
 });
 
-const getTransactionsAggCategory = cache(
-    async (month: number, year: number) => {
-        //@ts-ignore
-        return await db.transaction.groupBy({
-            by: ["category"],
-            where: {
-                date: {
-                    gt: new Date(year, month, 1),
-                    lte: new Date(year, month + 1, 0),
-                },
-                NOT: {
-                    category: {
-                        contains: "payment",
-                    },
-                },
-            },
-            _sum: {
-                amount: true,
-            },
-        });
-    }
-);
-
 const sankeyData = cache(async (month: number, year: number) => {
     //@ts-ignore
     return await db.transaction.groupBy({

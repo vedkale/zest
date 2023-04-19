@@ -32,7 +32,6 @@ const getItem = cache(async (id: number) => {
 });
 
 export async function GET(request: Request, context: { params: any }) {
-    // console.log("MEOW");
     try {
         var startTime = performance.now();
         const { searchParams } = new URL(request.url);
