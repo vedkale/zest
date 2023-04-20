@@ -7,6 +7,7 @@ import { EmptyPlaceholder } from '@/components/EmptyPlaceholder';
 import PlaidLink from '@/components/PlaidLink';
 import { SyncTransactionsButton } from '@/components/SyncTransactionsButton';
 import { filterTransactions, queryParamsToFilterValues, searchTransactions } from '@/lib/utils';
+import { getItemIds } from '@/lib/dbQueries';
 
 const sortByStates: { [key: string]: string }[] = [
     { date: 'desc' },
@@ -22,14 +23,6 @@ const getTransactions = cache(async (sortBy: { [key: string]: string }) => {
         orderBy: {
             ...sortBy,
         },
-    });
-});
-
-const getItemIds = cache(async () => {
-    return await db.item.findMany({
-        select: {
-            id: true
-        }
     });
 });
 

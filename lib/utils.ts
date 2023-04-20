@@ -13,13 +13,15 @@ export function formatDollar(
         | 'scientific'
         | 'engineering'
         | 'compact'
-        | undefined = 'compact'
+        | undefined = 'compact',
+    maximumFractionDigits: number = 0
 ): string {
     if (!input) return '$0';
     return input.toLocaleString('en-US', {
         style: 'currency',
         currency: 'USD',
         notation: notation,
+        maximumFractionDigits: maximumFractionDigits, 
     });
 }
 
