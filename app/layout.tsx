@@ -2,6 +2,7 @@ import "./globals.css";
 import { Roboto_Mono } from "next/font/google";
 import Sidebar from "@/components/Sidebar";
 import { cache } from "react";
+import { Toaster } from "@/components/Toaster";
 
 const roboto_mono = Roboto_Mono({
     subsets: ["latin"],
@@ -28,6 +29,7 @@ export default function RootLayout({
                 <Sidebar />
                 <main className="mt-0 flex min-w-fit flex-auto flex-col px-0">
                     {children}
+                    <Toaster />
                 </main>
             </body>
         </html>

@@ -3,9 +3,10 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Icons } from "./Icons";
+import { toast } from "@/components/ui/use-toast";
 
 async function syncTransactions(ids: { id: number }[]) {
-    const res = ids.map(async (id) => {
+    const promises = ids.map(async (id) => {
         const response = fetch(`/api/transactions/?id=${id.id}`, {
             method: "GET",
             next: {
@@ -14,18 +15,21 @@ async function syncTransactions(ids: { id: number }[]) {
         });
 
         return response;
-        // if (!response?.ok) {
-        //     //   toast({
-        //     //     title: "Something went wrong.",
-        //     //     description: "Your post was not deleted. Please try again.",
-        //     //     variant: "destructive",
-        //     //   })
-        //     console.error(`Account delete failed for id: ${id}`);
-        //     return false;
-        // }
     });
 
-    await Promise.all(res);
+    const responseAll = await Promise.all(promises);
+    for (let i = 0; i < responseAll.length; i++) {
+        const response = responseAll[i];
+        if (!response?.ok) {
+            toast({
+              title: "Something went wrong.",
+              description: "Failed to fetch transactions. Please try again.",
+              variant: "destructive",
+            })
+          console.error(`Fetch transaction failed for id: ${ids[i].id}`);
+          return false;
+      }
+    }
 
     return true;
 }
