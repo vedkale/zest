@@ -34,7 +34,7 @@ export default function SpendingAreaChart({
             data: prevData.map((d) => {
                 return {
                     date: new Date(d.date).getUTCDate(),
-                    amount: d.amount - Math.random() * 1000, //TODO: Change later
+                    amount: d.amount,
                 };
             }),
         },
