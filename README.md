@@ -2,6 +2,8 @@
 
 An open source budget application built using the Next.js 13 and Plaid.
 
+![1682137893878-godly-nize](https://user-images.githubusercontent.com/28488571/233762642-47b47b4c-8944-4077-90e7-c41f0937e07a.jpeg)
+
 ## About this project
 
 I wanted to learn modern app development in Next.js 13 beta features and server components. So I decided to build a budget application using Next.js 13 and Plaid. The issue is Plaid doesn't support OAuth unless you sign up for the production tier, so some banks might be missing. You could try the development tier and see how that goes. If you have any problems, feel free to open an issue or reach out to me.
