@@ -34,7 +34,7 @@ const MyCustomNode = ({
                 y={y}
                 width={width}
                 height={height}
-                fill="#5192ca"
+                fill="#06b6d4"
                 fillOpacity="1"
             />
             <text
@@ -125,12 +125,6 @@ export default function SankeyDiagram({
         ],
     };
 
-    const tmp = chartData.links.map((l) => ({
-        source: chartData.nodes[l.source].name,
-        target: chartData.nodes[l.target].name,
-        value: l.value,
-    }));
-
     return (
         <>
             <ResponsiveContainer aspect={16/9}>
@@ -148,7 +142,7 @@ export default function SankeyDiagram({
                         top: 50,
                         bottom: 50,
                     }}
-                    link={{ stroke: "#8884d8" }}
+                    link={{ stroke: "#6366f1" }}
                 >
                     {/* <Tooltip /> */}
                 </Sankey>

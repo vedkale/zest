@@ -2,19 +2,16 @@
 
 import { formatDollar } from '@/lib/utils';
 import {
-    LineChart,
-    Line,
     XAxis,
     YAxis,
     Legend,
     ResponsiveContainer,
-    Label,
     CartesianGrid,
     AreaChart,
     Area,
 } from 'recharts';
 
-export default function TimeChart({
+export default function SpendingAreaChart({
     data,
     prevData,
     currentMonth,
@@ -31,13 +28,16 @@ export default function TimeChart({
     currentMonth: string;
     prevMonth: string;
 }) {
-    const a = data.map((d) => {
-        return {
-            date: d.date,
-            amount: d.amount,
-        };
-    });
     const chartData = [
+        {
+            name: prevMonth,
+            data: prevData.map((d) => {
+                return {
+                    date: new Date(d.date).getUTCDate(),
+                    amount: d.amount - Math.random() * 1000, //TODO: Change later
+                };
+            }),
+        },
         {
             name: currentMonth,
             data: data.map((d) => {
@@ -47,26 +47,12 @@ export default function TimeChart({
                 };
             }),
         },
-        {
-            name: prevMonth,
-            data: prevData.map((d) => {
-                return {
-                    date: new Date(d.date).getUTCDate(),
-                    amount: d.amount - Math.random() * 200,
-                };
-            }),
-        },
     ];
 
     return (
         <>
             <ResponsiveContainer aspect={2}>
-                <AreaChart
-                    // width={500}
-                    // height={300}
-                    data={chartData}
-                    margin={{ top: 20 }}
-                >
+                <AreaChart data={chartData} margin={{ top: 20 }}>
                     <defs>
                         <linearGradient
                             id={currentMonth}
@@ -77,12 +63,12 @@ export default function TimeChart({
                         >
                             <stop
                                 offset='5%'
-                                stopColor='#8884d8'
-                                stopOpacity={0.4}
+                                stopColor='#06b6d4'
+                                stopOpacity={0.45}
                             />
                             <stop
                                 offset='95%'
-                                stopColor='#8884d8'
+                                stopColor='#06b6d4'
                                 stopOpacity={0}
                             />
                         </linearGradient>
@@ -95,12 +81,12 @@ export default function TimeChart({
                         >
                             <stop
                                 offset='5%'
-                                stopColor='#82ca9d'
-                                stopOpacity={0.8}
+                                stopColor='#d946ef'
+                                stopOpacity={0.3}
                             />
                             <stop
                                 offset='95%'
-                                stopColor='#82ca9d'
+                                stopColor='#d946ef'
                                 stopOpacity={0}
                             />
                         </linearGradient>
@@ -109,15 +95,25 @@ export default function TimeChart({
                         domain={['auto', 'auto']}
                         type='number'
                         dataKey='date'
-                        tick={false}
+                        tickLine={false}
                         axisLine={false}
+                        minTickGap={5}
+                        padding={{ left: 10, right: 10 }}
+                        interval="preserveStartEnd"
+                        style={{
+                            fontSize: "12px",
+                            fontFamily: "Inter; Helvetica",
+                            color: "red",
+                          }}
+                        tick={{ transform: "translate(0, 6)" }}
                     />
                     <YAxis
                         tickFormatter={(value: number, index: number) =>
-                            formatDollar(value)
+                            formatDollar(value, 'standard')
                         }
                         tickLine={false}
                         axisLine={false}
+                        fontSize={12}
                     />
                     <Legend />
                     <CartesianGrid
@@ -134,18 +130,18 @@ export default function TimeChart({
                             name={s.name}
                             key={s.name}
                             fillOpacity={1}
-                            // strokeWidth={2}
                             // fill="url(#colorUv)"
                             fill={
                                 s.name === currentMonth
-                                    ? `url(#${currentMonth})`
-                                    : `url(#${prevMonth})`
+                                    ? `url(#${prevMonth}) `
+                                    : `url(#${currentMonth})`
                             }
-                            strokeWidth={s.name === currentMonth ? 2 : 1}
-                            opacity={s.name === currentMonth ? 1 : 0.7}
+                            strokeWidth={2}
+                            // opacity={s.name === currentMonth ? 1 : 0.7}
                             stroke={
-                                s.name === currentMonth ? '#8884d8' : '#82ca9d'
+                                s.name === currentMonth ? '#d946ef' : '#06b6d4'
                             }
+                            isAnimationActive={false}
                         />
                     ))}
                 </AreaChart>
